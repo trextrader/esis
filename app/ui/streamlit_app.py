@@ -10,7 +10,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from app.api.schemas import CaseInput
+from app.api.schemas import CaseInput, PersonProfile
 from app.services.intake_service import normalize_case
 from app.services.triage_service import score_risk
 from app.services.recommendation_service import generate_recommendation
@@ -18,6 +18,9 @@ from app.services.packet_service import generate_packet
 from app.services.audit_service import generate_audit
 from app.services.routing_service import select_pathway
 from app.services.location_service import zip_to_coords, priority_resources_for_risk
+from app.services.housing_track_service import (
+    assign_housing_track, get_resource_programs, EDU_LABELS, RESOURCE_PROGRAMS
+)
 
 CASES_DIR = REPO_ROOT / "data" / "demo_cases"
 LOGO_PATH = Path(__file__).parent / "assets" / "esis_logo.png"
@@ -280,6 +283,101 @@ if person_lat is None and zip_input.strip():
 if person_lat is not None:
     st.success(f"Location resolved via {location_source}: {person_lat:.4f}, {person_lng:.4f}")
 
+# ── PERSON PROFILE — Housing Track & Community Ping ──────────────────
+with st.expander("👤  Person Profile — Housing Track Assignment & Community Ping (optional but powerful)", expanded=False):
+    st.caption(
+        "These answers determine which housing track ESIS assigns — different paths exist for "
+        "different situations. All fields are optional and stored only for this session."
+    )
+
+    pro_col1, pro_col2, pro_col3 = st.columns(3)
+
+    with pro_col1:
+        st.markdown("**Medical / Legal Status**")
+        is_disabled = st.checkbox("Has a disability", key="is_disabled",
+            help="Physical, mental, or cognitive — qualifies for Section 811, SOAR/SSI")
+        has_life_threatening = st.checkbox("Life-threatening condition if unsheltered", key="has_ltc",
+            help="Triggers medical respite voucher — overrides waitlists")
+        is_woman_children = st.checkbox("Woman with children under 18", key="is_wmc",
+            help="Child welfare laws mandate priority family placement")
+        disability_app_started = st.checkbox("Disability application already started", key="dis_app")
+
+    with pro_col2:
+        st.markdown("**Personal Situation**")
+        has_employment = st.checkbox("Has current employment", key="has_job",
+            help="Income accelerates Rapid Re-Housing approval")
+        is_known_substance = st.checkbox("Known substance use disorder", key="is_sud",
+            help="Routes to treatment + recovery housing, not standard shelter")
+        is_elderly = st.checkbox("Age 50 or older", key="is_elderly",
+            help="Senior housing programs, Area Agency on Aging priority")
+        months_homeless = st.number_input(
+            "Months homeless (0 = unknown)", min_value=0, max_value=360, value=0,
+            key="months_homeless", step=1,
+            help="12+ months = chronic homeless = federal housing priority"
+        )
+
+    with pro_col3:
+        st.markdown("**Background & Skills**")
+        education_level = st.selectbox(
+            "Education level",
+            ["", "none", "hs", "trade", "associates", "bachelors", "masters", "phd", "professional"],
+            format_func=lambda x: EDU_LABELS.get(x, "— select —") if x else "— select —",
+            key="edu_level",
+        )
+        professional_background = st.text_input(
+            "Professional background (brief)",
+            placeholder="e.g. Software engineer, 27 years CEO/Chairman",
+            key="pro_bg",
+        )
+        skills_summary = st.text_input(
+            "Skills / what you can offer",
+            placeholder="e.g. Python, ML, technical writing, public speaking",
+            key="skills",
+        )
+
+    st.markdown("**What do you need right now?**")
+    resource_options = {
+        "sleeping_bag": "Sleeping bag / blanket",
+        "tent": "Tent",
+        "food": "Food",
+        "clothing": "Clothing",
+        "phone": "Phone",
+        "phone_service": "Free phone service",
+        "laptop": "Laptop / PC",
+        "cooler": "Cooler",
+        "disability_application": "Disability application assistance",
+    }
+    need_cols = st.columns(3)
+    selected_needs: list[str] = []
+    for i, (key, label) in enumerate(resource_options.items()):
+        if need_cols[i % 3].checkbox(label, key=f"need_{key}"):
+            selected_needs.append(key)
+
+    st.markdown("**Community Ping — Let your neighborhood help**")
+    st.caption(
+        "ESIS can broadcast an anonymized profile to local community networks (Nextdoor, neighborhood apps) "
+        "describing your skills and needs. The community often has resources the system doesn't."
+    )
+    consent_ping = st.checkbox(
+        "I consent to ESIS generating a community ping message I can share", key="consent_ping"
+    )
+    if consent_ping:
+        ping_contact_cols = st.columns(3)
+        with ping_contact_cols[0]:
+            contact_email = st.text_input("Contact email (for ping)", key="ping_email", placeholder="you@email.com")
+        with ping_contact_cols[1]:
+            contact_phone = st.text_input("Contact phone (for ping)", key="ping_phone", placeholder="303-555-0100")
+        with ping_contact_cols[2]:
+            contact_apps = st.multiselect(
+                "Messaging apps",
+                ["Signal", "Telegram", "Discord", "WhatsApp", "Facebook Messenger",
+                 "Instagram DM", "Twitter/X DM", "Skype", "LinkedIn"],
+                key="ping_apps",
+            )
+    else:
+        contact_email = contact_phone = ""
+        contact_apps = []
+
 analyze_btn = st.button("🔍  Analyze with ESIS", type="primary", use_container_width=True)
 
 if analyze_btn:
@@ -293,12 +391,40 @@ if analyze_btn:
         low_funds=low_funds,
         no_transport=no_transport,
         recent_discharge=recent_discharge,
+        cannot_congregate=cannot_congregate,
+        chronic_homeless=chronic_homeless,
+    )
+
+    # Build person profile from profile section
+    profile = PersonProfile(
+        is_disabled=st.session_state.get("is_disabled", False),
+        is_woman_with_minor_children=st.session_state.get("is_wmc", False),
+        has_life_threatening_condition=st.session_state.get("has_ltc", False),
+        has_employment=st.session_state.get("has_job", False),
+        is_known_substance_user=st.session_state.get("is_sud", False),
+        is_elderly=st.session_state.get("is_elderly", False),
+        months_homeless=int(st.session_state.get("months_homeless", 0)),
+        education_level=st.session_state.get("edu_level", ""),
+        professional_background=st.session_state.get("pro_bg", ""),
+        skills_summary=st.session_state.get("skills", ""),
+        resource_needs=selected_needs,
+        consent_community_ping=st.session_state.get("consent_ping", False),
+        contact_email=st.session_state.get("ping_email", ""),
+        contact_phone=st.session_state.get("ping_phone", ""),
+        contact_apps=[a.lower().replace(" ", "_") for a in st.session_state.get("ping_apps", [])],
+        disability_application_started=st.session_state.get("dis_app", False),
     )
 
     with st.spinner("ESIS analyzing case..."):
         structured = normalize_case(inp)
         risk = score_risk(structured)
-        recommendation = generate_recommendation(structured, risk, hf_token=HF_TOKEN or None)
+        housing_track = assign_housing_track(profile)
+        recommendation = generate_recommendation(
+            structured, risk,
+            hf_token=HF_TOKEN or None,
+            profile=profile,
+            housing_track=housing_track,
+        )
         packet = generate_packet(structured, risk, recommendation)
         routing = select_pathway(structured, risk)
         audit = generate_audit(structured, risk, recommendation,
@@ -355,6 +481,96 @@ if analyze_btn:
         st.warning("Battery conservation mode active — route optimized for minimal steps")
 
     st.divider()
+
+    # ── SCREEN 2b: HOUSING TRACK ──────────────────────────────────
+    has_profile_data = any([
+        profile.is_disabled, profile.is_woman_with_minor_children,
+        profile.has_life_threatening_condition, profile.has_employment,
+        profile.is_known_substance_user, profile.is_elderly,
+        profile.months_homeless > 0, profile.education_level,
+        profile.resource_needs,
+    ])
+
+    if has_profile_data:
+        st.subheader("2b  Housing Track Assignment")
+
+        # Priority score badge
+        score = housing_track.priority_score
+        score_color = "#EF4444" if score >= 70 else "#F59E0B" if score >= 40 else "#10B981"
+        st.markdown(
+            f"""
+            <div style='background:#0F172A;border:1px solid {score_color};border-radius:8px;
+                        padding:1rem 1.5rem;margin-bottom:1rem'>
+                <span style='color:{score_color};font-size:1.4rem;font-weight:bold'>
+                    Priority Score: {score}/100
+                </span>
+                &nbsp;&nbsp;
+                <span style='color:#F8FAFC;font-size:1.1rem'>
+                    Track: {housing_track.track_name}
+                </span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Why this track
+        if housing_track.rationale:
+            st.markdown("**Why this track was assigned:**")
+            for r in housing_track.rationale:
+                st.markdown(f"- {r}")
+
+        # Immediate actions for this track
+        with st.expander(f"🎯  Immediate Actions — {housing_track.track_name}", expanded=True):
+            for i, action in enumerate(housing_track.immediate_actions, 1):
+                st.markdown(f"**{i}.** {action}")
+
+        # Target programs
+        with st.expander("🏛️  Target Housing Programs"):
+            for prog in housing_track.target_programs:
+                st.markdown(f"- {prog}")
+            st.caption(f"Estimated timeline: {housing_track.estimated_timeline}")
+
+        # Physical resource needs
+        if profile.resource_needs:
+            with st.expander("🎒  Physical Resource Needs — Where to Get Them"):
+                resource_info = get_resource_programs(profile.resource_needs)
+                for need_key, info in resource_info.items():
+                    st.markdown(f"**{info['name']}**")
+                    for src in info["sources"]:
+                        st.markdown(f"  - {src}")
+
+        # Disability application
+        if profile.is_disabled and not profile.disability_application_started:
+            st.error(
+                "⚠️  **SSI/SSDI Application Not Started** — Every day without an application "
+                "is a day of lost retroactive income. SOAR-trained workers can get you approved "
+                "in 60–90 days vs. the standard 18-month process. Call 211 today and ask for "
+                "a SOAR case manager."
+            )
+
+        # Community ping
+        if profile.consent_community_ping and housing_track.community_ping_message:
+            st.divider()
+            st.subheader("📡  Community Ping — Ready to Share")
+            st.caption(
+                "Copy and post this to Nextdoor, your neighborhood Facebook group, LinkedIn, "
+                "or any local community network. Real community members often have exactly what you need."
+            )
+            ping_text = housing_track.community_ping_message
+            st.text_area("Community ping message", value=ping_text, height=200)
+            st.download_button(
+                "⬇️  Download Community Ping (.txt)",
+                ping_text,
+                file_name=f"esis_community_ping_{structured.case_id}.txt",
+                mime="text/plain",
+            )
+            st.info(
+                "💡 **Where to post:** Nextdoor (neighborhood tab) • Facebook neighborhood groups • "
+                "LinkedIn (with privacy settings) • Reddit r/Denver or r/Colorado • "
+                "Local mutual aid groups on Signal/Telegram • Church/community center bulletin boards"
+            )
+
+        st.divider()
 
     # ── SCREEN 3: ACTION PLAN + PACKET ────────────────────────────
     st.subheader("3  ESIS Action Plan  *(Gemma 4 generated)*")
