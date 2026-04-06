@@ -515,6 +515,14 @@ with col_right:
         help="HUD priority — direct housing voucher pathway available",
     )
 
+# selected_needs is populated inside the profile expander below;
+# initialize here so save panel can reference it before that block renders
+selected_needs: list[str] = [
+    key for key in ["sleeping_bag", "tent", "food", "clothing", "phone",
+                    "phone_service", "laptop", "cooler", "disability_application"]
+    if st.session_state.get(f"need_{key}", False)
+]
+
 # ── SAVE SCENARIO ────────────────────────────────────────────────────
 with st.expander("💾  Save this scenario for later", expanded=False):
     save_col1, save_col2 = st.columns([3, 1])
@@ -680,7 +688,7 @@ with st.expander("👤  Person Profile — Housing Track Assignment & Community 
         "disability_application": "Disability application assistance",
     }
     need_cols = st.columns(3)
-    selected_needs: list[str] = []
+    selected_needs = []
     for i, (key, label) in enumerate(resource_options.items()):
         if need_cols[i % 3].checkbox(label, key=f"need_{key}"):
             selected_needs.append(key)
