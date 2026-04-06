@@ -23,16 +23,29 @@ from app.services.housing_track_service import (
 )
 
 CASES_DIR = REPO_ROOT / "data" / "demo_cases"
+SAVED_DIR = REPO_ROOT / "data" / "saved_cases"
+SAVED_DIR.mkdir(parents=True, exist_ok=True)
 LOGO_PATH = Path(__file__).parent / "assets" / "esis_logo.png"
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 
-CASE_FILES = {
-    "Post-Discharge Instability": "case_post_discharge.json",
-    "Exposure / Cold Night Risk": "case_cold_night.json",
-    "Administrative Pathway Collapse": "case_lost_documents.json",
-    "Multi-Domain Failure": "case_mixed_failure.json",
-    "Custom — enter your own": None,
+DEMO_CASES = {
+    "Post-Discharge Instability": ("demo", "case_post_discharge.json"),
+    "Exposure / Cold Night Risk": ("demo", "case_cold_night.json"),
+    "Administrative Pathway Collapse": ("demo", "case_lost_documents.json"),
+    "Multi-Domain Failure": ("demo", "case_mixed_failure.json"),
 }
+
+
+def _build_case_list() -> dict[str, tuple[str, str] | None]:
+    """Build dropdown options: demo cases + any saved cases + custom."""
+    options: dict[str, tuple[str, str] | None] = {}
+    options.update(DEMO_CASES)
+    saved = sorted(SAVED_DIR.glob("*.json"))
+    for p in saved:
+        label = f"💾 {p.stem.replace('_', ' ').title()}"
+        options[label] = ("saved", p.name)
+    options["Custom — enter your own"] = None
+    return options
 
 # Resource type display config
 RESOURCE_ICONS = {
@@ -61,9 +74,19 @@ RESOURCE_COLORS = {
 }
 
 
-def load_case(filename: str) -> dict:
-    with open(CASES_DIR / filename) as f:
+def load_case(source: str, filename: str) -> dict:
+    base = CASES_DIR if source == "demo" else SAVED_DIR
+    with open(base / filename) as f:
         return json.load(f)
+
+
+def save_case(name: str, data: dict) -> Path:
+    slug = name.strip().lower().replace(" ", "_").replace("/", "-")
+    slug = "".join(c for c in slug if c.isalnum() or c in "_-")[:40]
+    path = SAVED_DIR / f"{slug}.json"
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+    return path
 
 
 def risk_bar_color(score: float) -> str:
@@ -439,13 +462,27 @@ st.subheader("Describe the Situation")
 col_left, col_right = st.columns([2, 1])
 
 with col_left:
+    case_list = _build_case_list()
     selected_label = st.selectbox(
         "Load a demo scenario or enter your own:",
-        list(CASE_FILES.keys()),
+        list(case_list.keys()),
     )
     case_data: dict = {}
-    if CASE_FILES[selected_label]:
-        case_data = load_case(CASE_FILES[selected_label])
+    if case_list[selected_label]:
+        source, filename = case_list[selected_label]
+        case_data = load_case(source, filename)
+        # Pre-populate profile session_state keys from saved cases
+        if source == "saved":
+            _profile_keys = {
+                "is_disabled": "is_disabled", "has_ltc": "has_life_threatening_condition",
+                "is_wmc": "is_woman_with_minor_children", "has_job": "has_employment",
+                "is_sud": "is_known_substance_user", "is_elderly": "is_elderly",
+                "months_homeless": "months_homeless", "edu_level": "education_level",
+                "pro_bg": "professional_background", "skills": "skills_summary",
+            }
+            for sk, ck in _profile_keys.items():
+                if ck in case_data and sk not in st.session_state:
+                    st.session_state[sk] = case_data[ck]
 
     raw_text = st.text_area(
         "Situation description",
@@ -477,6 +514,51 @@ with col_right:
         value=case_data.get("chronic_homeless", False),
         help="HUD priority — direct housing voucher pathway available",
     )
+
+# ── SAVE SCENARIO ────────────────────────────────────────────────────
+with st.expander("💾  Save this scenario for later", expanded=False):
+    save_col1, save_col2 = st.columns([3, 1])
+    with save_col1:
+        save_name = st.text_input(
+            "Scenario name",
+            placeholder="e.g. My Situation — April 2026",
+            key="save_name",
+            label_visibility="collapsed",
+        )
+    with save_col2:
+        save_btn = st.button("Save", key="save_btn", use_container_width=True)
+
+    if save_btn:
+        if not save_name.strip():
+            st.warning("Enter a name first.")
+        else:
+            snapshot = {
+                "raw_text": raw_text,
+                "has_pain": has_pain,
+                "has_exposure_risk": has_exposure,
+                "has_shelter": has_shelter,
+                "has_lost_documents": lost_docs,
+                "low_battery": low_battery,
+                "low_funds": low_funds,
+                "no_transport": no_transport,
+                "recent_discharge": recent_discharge,
+                "cannot_congregate": cannot_congregate,
+                "chronic_homeless": chronic_homeless,
+                # Profile fields
+                "is_disabled": st.session_state.get("is_disabled", False),
+                "is_woman_with_minor_children": st.session_state.get("is_wmc", False),
+                "has_life_threatening_condition": st.session_state.get("has_ltc", False),
+                "has_employment": st.session_state.get("has_job", False),
+                "is_known_substance_user": st.session_state.get("is_sud", False),
+                "is_elderly": st.session_state.get("is_elderly", False),
+                "months_homeless": int(st.session_state.get("months_homeless", 0)),
+                "education_level": st.session_state.get("edu_level", ""),
+                "professional_background": st.session_state.get("pro_bg", ""),
+                "skills_summary": st.session_state.get("skills", ""),
+                "resource_needs": selected_needs,
+            }
+            path = save_case(save_name, snapshot)
+            st.success(f"Saved as **{path.stem}** — it will appear in the dropdown on next load.")
 
 # ── LOCATION INPUT ───────────────────────────────────────────────────
 st.markdown('<div class="esis-section-label" style="margin-top:0.8rem">Location</div>', unsafe_allow_html=True)
