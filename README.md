@@ -11,6 +11,10 @@ python_version: "3.11"
 
 # ESIS — Edge Survival Intelligence System
 
+<p align="center">
+  <img src="esis_logo.png" alt="ESIS Logo" width="160"/>
+</p>
+
 ![ESIS Banner](docs/figures/esis_banner_560x280_full.png)
 
 **Offline-first crisis navigation for people experiencing homelessness, powered by Gemma 4.**
