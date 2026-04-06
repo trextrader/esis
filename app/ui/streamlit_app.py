@@ -1024,13 +1024,14 @@ if analyze_btn:
         st.markdown("**Closest resources by distance:**")
         for r in physical_resources[:8]:
             icon = RESOURCE_ICONS.get(r["type"], "📍")
-            dist = r.get("distance_mi", "?")
+            dist_mi = r.get("distance_mi", 0)
+            dist_label = "Statewide" if dist_mi == 0 else f"{dist_mi} mi"
             hours = r.get("hours", "")
             services_str = ", ".join(r.get("services", [])[:3])
             notes = r.get("notes", "")
             st.markdown(
                 f"{icon} **{r['name']}** &nbsp;|&nbsp; 📞 `{r['phone']}` &nbsp;|&nbsp; "
-                f"📍 {dist} mi &nbsp;|&nbsp; 🕐 {hours}  \n"
+                f"📍 {dist_label} &nbsp;|&nbsp; 🕐 {hours}  \n"
                 f"<small style='color:#94A3B8'>{services_str}</small>",
                 unsafe_allow_html=True,
             )
