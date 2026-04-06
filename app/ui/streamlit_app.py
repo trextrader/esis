@@ -475,6 +475,9 @@ with col_left:
         # Always set every key (defaulting to empty/False/0) so stale
         # state from a previous session never bleeds into a loaded case.
         if source == "saved":
+            # Restore text area — must set session_state directly because
+            # Streamlit ignores value= for keyed widgets after first render
+            st.session_state["raw_text_input"] = case_data.get("raw_text", "")
             _profile_map = {
                 "is_disabled":    ("is_disabled",                  False),
                 "has_ltc":        ("has_life_threatening_condition", False),
