@@ -1,0 +1,22 @@
+{
+  "case_id": "case-004",
+  "label": "Multi-Domain System Failure",
+  "description": "Failure Mode: simultaneous medical, exposure, and document collapse",
+  "raw_text": "I was discharged three days ago into the cold. I have an infection that isn't healing. I lost my ID during a theft. My phone is dying. The referral chain is broken. I don't know where to start.",
+  "has_pain": true,
+  "has_exposure_risk": true,
+  "has_shelter": false,
+  "has_lost_documents": true,
+  "low_battery": true,
+  "low_funds": true,
+  "no_transport": true,
+  "recent_discharge": true,
+  "location": null,
+  "expected_priority": "high",
+  "expected_domains": ["medical", "exposure", "documents"],
+  "gold_actions": [
+    "Medical escalation is primary — call 911 if infection shows systemic symptoms",
+    "Get inside immediately — medical safety takes priority over documents",
+    "Once stable, generate full advocacy packet covering all three failure domains"
+  ]
+}

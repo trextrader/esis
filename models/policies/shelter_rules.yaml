@@ -1,0 +1,33 @@
+# models/policies/shelter_rules.yaml
+shelter_priority_order:
+  1: medical_respite      # if active medical flag
+  2: non_congregate       # hotel/motel placement when available
+  3: warming_center       # immediate cold exposure
+  4: emergency_shelter
+  5: transitional_housing
+
+routing_constraints:
+  low_battery:
+    - prefer nearest option regardless of quality rating
+    - disable all non-essential routing steps
+    - send offline-first route only
+    - do not attempt calls that consume battery without shelter goal
+  no_transport:
+    - limit to walkable distance (0.5 mile radius)
+    - prefer 24-hour operations
+    - include transit options if available
+  partner_disabled:
+    - require ADA-accessible facility
+    - require couples or family accommodation
+    - escalate if only single-occupancy options available
+
+fallback_sequence:
+  step_1: try_211_call
+  step_2: try_online_shelter_finder
+  step_3: walk_to_nearest_hospital_er_for_warmth
+  step_4: walk_to_24_hour_public_building
+
+warming_center_indicators:
+  - temperature_below_32f
+  - wind_chill_below_20f
+  - rain_or_wet_conditions_below_50f

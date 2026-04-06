@@ -1,0 +1,42 @@
+# models/policies/documentation_rules.yaml
+id_replacement_order:
+  1:
+    document: birth_certificate
+    method: VitalChek or state vital records office
+    cost: "0-25 (fee waiver available for homeless individuals)"
+    time: "3-10 business days"
+    notes: "Required first — needed to obtain all other documents"
+  2:
+    document: social_security_card
+    method: SSA office in person
+    cost: free
+    requires: birth_certificate_or_alternative_proof
+    time: "Same day appointment (card mailed within 2 weeks)"
+  3:
+    document: state_id_or_drivers_license
+    method: DMV
+    cost: "0-35 (fee waiver available)"
+    requires: birth_certificate AND social_security_card
+    time: "Same day temporary, permanent card in 2-4 weeks"
+
+paper_first_workflow:
+  trigger: "lost_documents AND broken_referral_chain"
+  steps:
+    - generate handwritten intake summary with ESIS
+    - request advocate to accompany to all appointments
+    - use ESIS packet as identity substitute where accepted
+    - prioritize agencies that accept alternative verification
+
+preservation_checklist:
+  - photograph all remaining documents immediately
+  - email copies to yourself if phone access available
+  - give copies to a trusted advocate or case manager
+  - note current document state in ESIS audit log
+  - store originals in a secure, waterproof location
+
+referral_chain_repair:
+  broken_referral_steps:
+    - generate new ESIS referral packet
+    - contact receiving agency directly (do not rely on caseworker chain)
+    - request coordinated entry re-intake
+    - document every contact attempt with timestamp

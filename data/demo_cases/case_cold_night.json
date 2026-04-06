@@ -1,0 +1,22 @@
+{
+  "case_id": "case-002",
+  "label": "Exposure-Driven Survival Risk",
+  "description": "Failure Mode: environmental survivability collapse",
+  "raw_text": "It is below freezing tonight and I am outside. My phone is at 9% and I have no cash. I tried calling 211 but couldn't get through. I don't know where the nearest warming shelter is.",
+  "has_pain": false,
+  "has_exposure_risk": true,
+  "has_shelter": false,
+  "has_lost_documents": false,
+  "low_battery": true,
+  "low_funds": true,
+  "no_transport": false,
+  "recent_discharge": false,
+  "location": null,
+  "expected_priority": "high",
+  "expected_domains": ["exposure"],
+  "gold_actions": [
+    "Use offline shelter locator to find nearest warming center immediately",
+    "Conserve battery — disable background apps now",
+    "Walk to nearest 24-hour building for warmth while routing to shelter"
+  ]
+}

@@ -1,0 +1,62 @@
+# models/gemma/prompt_templates.yaml
+
+system_prompt: |
+  You are ESIS — Edge Survival Intelligence System. You help people experiencing
+  homelessness navigate life-threatening situations by generating structured,
+  actionable intervention plans.
+
+  You must always respond in valid JSON matching the exact schema provided.
+  You must never give vague advice. Every output must be specific, actionable,
+  and safe for someone in a crisis situation with limited resources.
+
+  You are not a chatbot. You are a constrained decision-support system built
+  to serve people in their most vulnerable moments.
+
+case_reasoning_template: |
+  CASE SUMMARY:
+  {case_summary}
+
+  RISK ASSESSMENT:
+  - Medical risk: {medical_risk}
+  - Exposure risk: {exposure_risk}
+  - Documentation risk: {documentation_risk}
+  - Priority: {overall_priority}
+  - Escalation required: {requires_escalation}
+
+  ACTIVE CONSTRAINTS:
+  {constraints}
+
+  RELEVANT POLICIES:
+  {policy_context}
+
+  Generate a structured intervention plan. Respond ONLY in this exact JSON format:
+  {{
+    "summary": "2-3 sentence situation summary",
+    "top_actions": [
+      "Specific action 1",
+      "Specific action 2",
+      "Specific action 3"
+    ],
+    "fallback_plan": "What to do if the primary actions fail or are unavailable",
+    "what_to_preserve": ["Item 1 to document or protect", "Item 2"]
+  }}
+
+packet_generation_template: |
+  You are generating a referral-ready advocacy packet for an agency or advocate.
+
+  CASE:
+  {case_summary}
+
+  RISK SCORES: Medical={medical_risk}, Exposure={exposure_risk}, Documents={documentation_risk}
+
+  RECOMMENDED ACTIONS:
+  {top_actions}
+
+  Generate a professional advocacy packet in this exact JSON format:
+  {{
+    "one_page_summary": "Professional summary for intake staff (3-4 sentences)",
+    "advocate_script": "Script for an advocate calling on behalf of this person",
+    "referral_handoff": "Structured handoff note for the next agency",
+    "action_timeline": ["Step 1 (immediate)", "Step 2 (within 24h)", "Step 3 (within 72h)"],
+    "preservation_checklist": ["Document or item 1 to preserve", "Document or item 2"]
+  }}

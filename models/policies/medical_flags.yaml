@@ -1,0 +1,28 @@
+# models/policies/medical_flags.yaml
+high_risk_symptoms:
+  - spinal infection
+  - sepsis
+  - cardiac symptoms
+  - altered consciousness
+  - uncontrolled bleeding
+  - severe pain post-discharge
+  - fever with known infection
+
+red_flags:
+  - recent discharge without follow-up plan
+  - pain escalating over 48 hours
+  - prescribed medication with no pharmacy access
+  - wound that is not healing
+  - spinal symptoms (numbness, weakness, bladder/bowel changes)
+
+required_actions_on_red_flag:
+  - document complete symptom timeline
+  - contact hospital social worker immediately
+  - request medical respite or recuperative care placement
+  - generate advocacy packet with symptom history and discharge notes
+
+discharge_objection_triggers:
+  - discharge to street with active infection
+  - discharge without follow-up care plan
+  - discharge with unresolved pain above threshold
+  - discharge without medication supply

@@ -1,0 +1,22 @@
+{
+  "case_id": "case-003",
+  "label": "Administrative Pathway Collapse",
+  "description": "Failure Mode: document and referral breakdown",
+  "raw_text": "I lost my ID and social security card. My caseworker has not returned my calls in two weeks. The shelter that was supposed to take me said they never received my referral. I have no paperwork to show anyone.",
+  "has_pain": false,
+  "has_exposure_risk": false,
+  "has_shelter": false,
+  "has_lost_documents": true,
+  "low_battery": false,
+  "low_funds": false,
+  "no_transport": false,
+  "recent_discharge": false,
+  "location": null,
+  "expected_priority": "medium",
+  "expected_domains": ["documents"],
+  "gold_actions": [
+    "Begin ID replacement at DMV — request fee waiver form for homeless individuals",
+    "Generate referral-ready packet to restart the broken intake chain",
+    "Switch to paper-first workflow for all next steps"
+  ]
+}

@@ -1,0 +1,292 @@
+digraph ESIS_Operational {
+
+  graph [
+    rankdir=LR,
+    splines=curved,
+    bgcolor="#08111F",
+    pad=0.5,
+    nodesep=0.38,
+    ranksep=0.7,
+    fontname="Helvetica",
+    fontsize=20,
+    fontcolor="#F8FAFC",
+    labelloc="t",
+    label="ESIS Operational Flow",
+    size="18.5,8",
+    ratio=fill,
+    dpi=72
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Helvetica",
+    fontsize=11,
+    fontcolor="#F8FAFC",
+    penwidth=2.2,
+    margin="0.22,0.15",
+    width=2.9,
+    height=0.78
+  ];
+
+  edge [
+    color="#A7B0C0",
+    fontname="Helvetica",
+    fontsize=9,
+    fontcolor="#D7DDEA",
+    penwidth=1.6,
+    arrowsize=0.8
+  ];
+
+  // ══ COLUMN 1: FIELD ══════════════════════════════════════
+  subgraph cluster_field {
+    label="1. Field Reality";
+    color="#1E3A5F";
+    fontcolor="#93C5FD";
+    fontsize=11;
+    penwidth=1.5;
+    style="rounded";
+    margin=12;
+
+    user_profile [
+      fillcolor="#102B4C", color="#60A5FA",
+      label="User / Household Profile\ntrauma • safety • mobility\noffline / low-battery realities"
+    ];
+    crisis_context [
+      fillcolor="#102B4C", color="#60A5FA",
+      label="Crisis Context\nexposure • discharge • overdose\neviction • violence • transport"
+    ];
+    observed_inputs [
+      fillcolor="#102B4C", color="#60A5FA",
+      label="Observed Inputs\nvoice • image • symptoms • GPS\ncash • meds • battery • network"
+    ];
+  }
+
+  // ══ COLUMN 2: UI ═════════════════════════════════════════
+  subgraph cluster_ui {
+    label="2. ESIS UI Layer";
+    color="#1E3A5F";
+    fontcolor="#93C5FD";
+    fontsize=11;
+    penwidth=1.5;
+    style="rounded";
+    margin=12;
+
+    mobile_ui [
+      fillcolor="#102B4C", color="#60A5FA",
+      label="Mobile / Edge UI\noffline-first • emergency mode\nlarge text / low cognitive load"
+    ];
+    voice_doc [
+      fillcolor="#102B4C", color="#60A5FA",
+      label="Voice + Document Intake\nSTT / TTS • on-device OCR\nmultimodal structured extraction"
+    ];
+    emerg_panel [
+      fillcolor="#102B4C", color="#60A5FA",
+      label="Emergency Guidance Panel\none-tap crisis pathway\nnext 3 steps • red-flag escalation"
+    ];
+  }
+
+  // ══ COLUMN 3: GEMMA ══════════════════════════════════════
+  subgraph cluster_gemma {
+    label="3. Gemma 4  (On-Device)";
+    color="#1E4D3A";
+    fontcolor="#6EE7C4";
+    fontsize=11;
+    penwidth=1.5;
+    style="rounded";
+    margin=12;
+
+    gemma_runtime [
+      fillcolor="#0E3B2E", color="#34D399",
+      label="Gemma 4 Runtime\nlocal multimodal reasoning\nzero cloud dependency"
+    ];
+    gemma_router [
+      fillcolor="#0E3B2E", color="#34D399",
+      label="Function Calling Router\nschema-constrained tools\narguments validated before use"
+    ];
+    gemma_guard [
+      fillcolor="#0E3B2E", color="#34D399",
+      label="Safety / Privacy Guard\nmin-necessary data release\nlocation suppression mode"
+    ];
+  }
+
+  // ══ COLUMN 4: MATH CORE ══════════════════════════════════
+  subgraph cluster_math {
+    label="4. POMDP + CVaR Decision Core";
+    color="#5A3D10";
+    fontcolor="#FDE68A";
+    fontsize=11;
+    penwidth=1.5;
+    style="rounded";
+    margin=12;
+
+    state_vec [
+      fillcolor="#4A3410", color="#FBBF24",
+      label="State Vector x_t\ncash • health • exposure • docs\nbattery • connectivity"
+    ];
+    belief [
+      fillcolor="#4A3410", color="#FBBF24",
+      label="Belief State b_t(x)\npartial observability\nuncertainty + confidence weighting"
+    ];
+    monte [
+      fillcolor="#4A3410", color="#FBBF24",
+      label="Monte Carlo Engine\nN trajectories per plan\nestimate stability + failure probs"
+    ];
+    risk_opt [
+      fillcolor="#4A3410", color="#FBBF24",
+      label="CVaR Risk Optimization\nmax E[G] − CVaRα(Harm)\nP(Harm>τ) ≤ ε enforced"
+    ];
+  }
+
+  // ══ COLUMN 5: ACTION ═════════════════════════════════════
+  subgraph cluster_action {
+    label="5. Action Selection + Tooling";
+    color="#5A2800";
+    fontcolor="#FCA97A";
+    fontsize=11;
+    penwidth=1.5;
+    style="rounded";
+    margin=12;
+
+    plan [
+      fillcolor="#4A1F0D", color="#FB923C",
+      label="Plan Selector\nsafest feasible plan chosen\n0–72h stab. + durable exit"
+    ];
+    resource_tool [
+      fillcolor="#4A1F0D", color="#FB923C",
+      label="Resource Lookup Tool\nshelters • clinics • food • legal\nrespite / non-congregate paths"
+    ];
+    advocacy_tool [
+      fillcolor="#4A1F0D", color="#FB923C",
+      label="Routing + Advocacy Tools\noffline routing • scripted calls\nreferral + discharge-objection pack"
+    ];
+  }
+
+  // ══ COLUMN 6: EXECUTION ══════════════════════════════════
+  subgraph cluster_exec {
+    label="6. Execution Layer";
+    color="#0E3040";
+    fontcolor="#6EE7E7";
+    fontsize=11;
+    penwidth=1.5;
+    style="rounded";
+    margin=12;
+
+    exec [
+      fillcolor="#0E2E36", color="#2DD4BF",
+      label="Execution Layer\naction delivery to user\ncall / SMS / packet send"
+    ];
+    partner [
+      fillcolor="#0E2E36", color="#2DD4BF",
+      label="Partner Interface\n211 • coordinated entry\nclinical handoff • housing ops"
+    ];
+    escalation [
+      fillcolor="#0E2E36", color="#2DD4BF",
+      label="Escalation Trigger\noverdose / sepsis / psychiatric\ndo-not-delay red-flag flow"
+    ];
+  }
+
+  // ══ COLUMN 7: OUTCOMES ═══════════════════════════════════
+  subgraph cluster_outcomes {
+    label="7. Outcomes + Governance";
+    color="#2D3A55";
+    fontcolor="#94A3B8";
+    fontsize=11;
+    penwidth=1.5;
+    style="rounded";
+    margin=12;
+
+    outcome_imm [
+      fillcolor="#172235", color="#64748B",
+      label="Immediate  (0–72h)\nreduced lethal exposure\nfaster medical escalation"
+    ];
+    outcome_dur [
+      fillcolor="#172235", color="#64748B",
+      label="Durable  (Weeks+)\nstable housing pathway\nreduce preventable mortality"
+    ];
+    audit [
+      fillcolor="#172235", color="#64748B",
+      label="Audit + Fairness Log\nhash-chained events\nbelief state update → loop"
+    ];
+  }
+
+  // ════════════════════════════════════════════════════════
+  // FORCE HORIZONTAL ROW ALIGNMENT ACROSS CLUSTERS
+  // ════════════════════════════════════════════════════════
+  { rank=same;
+    user_profile; mobile_ui; gemma_runtime; state_vec; plan; exec; outcome_imm;
+  }
+
+  { rank=same;
+    crisis_context; voice_doc; gemma_router; belief; resource_tool; partner; outcome_dur;
+  }
+
+  { rank=same;
+    observed_inputs; emerg_panel; gemma_guard; monte; advocacy_tool; escalation; audit;
+  }
+
+  // ════════════════════════════════════════════════════════
+  //  EDGES
+  // ════════════════════════════════════════════════════════
+
+  // Col 1 → Col 2
+  user_profile    -> mobile_ui    [weight=15];
+  crisis_context  -> voice_doc    [weight=10];
+  observed_inputs -> mobile_ui    [weight=15];
+  observed_inputs -> voice_doc    [weight=10];
+
+  // Col 2 → Col 3
+  mobile_ui   -> gemma_runtime  [weight=20];
+  voice_doc   -> gemma_runtime  [weight=15];
+  emerg_panel -> gemma_router   [weight=10, style=dashed];
+
+  // Col 3 → Col 4
+  gemma_runtime -> state_vec    [weight=20];
+  gemma_router  -> state_vec    [weight=10, style=dashed];
+  gemma_guard   -> belief       [weight=10, style=dashed];
+
+  // Math chain
+  state_vec -> belief   [weight=20];
+  belief    -> monte    [weight=20];
+  monte     -> risk_opt [weight=20];
+
+  // Col 4 → Col 5
+  risk_opt -> plan          [label="plan", weight=20];
+  plan -> resource_tool     [weight=15];
+  plan -> advocacy_tool     [weight=15];
+
+  // Col 5 → Col 6
+  resource_tool  -> exec       [weight=20];
+  advocacy_tool  -> exec       [weight=15];
+  advocacy_tool  -> partner    [weight=10, style=dashed];
+  plan           -> escalation [weight=5, style=dashed];
+
+  // Col 6 → Col 7
+  exec       -> outcome_imm  [weight=20];
+  partner    -> outcome_dur  [weight=20];
+  escalation -> outcome_imm  [weight=10, style=dashed];
+
+  outcome_imm -> audit  [weight=15];
+  outcome_dur -> audit  [weight=15];
+
+  // ── Feedback loops (visually secondary) ───────────────────
+  audit -> state_vec [
+    label="belief\nupdate",
+    style=dashed,
+    color="#2A3A52",
+    penwidth=1.1,
+    constraint=false,
+    weight=0,
+    minlen=1
+  ];
+
+  outcome_imm -> gemma_runtime [
+    label="outcome\nsignal",
+    style=dashed,
+    color="#2A3A52",
+    penwidth=1.1,
+    constraint=false,
+    weight=0,
+    minlen=1
+  ];
+}

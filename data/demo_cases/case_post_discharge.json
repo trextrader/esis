@@ -1,0 +1,22 @@
+{
+  "case_id": "case-001",
+  "label": "Post-Discharge Instability",
+  "description": "Failure Mode: discharge without recovery support",
+  "raw_text": "I was just discharged from the hospital. I have severe back pain and a spinal infection they didn't fully treat. I have no place to go and my discharge plan fell through. I don't have any money and my phone is at 18%.",
+  "has_pain": true,
+  "has_exposure_risk": false,
+  "has_shelter": false,
+  "has_lost_documents": false,
+  "low_battery": true,
+  "low_funds": true,
+  "no_transport": true,
+  "recent_discharge": true,
+  "location": null,
+  "expected_priority": "high",
+  "expected_domains": ["medical", "housing"],
+  "gold_actions": [
+    "Call hospital social worker immediately to dispute unsafe discharge",
+    "Request medical respite or recuperative care placement",
+    "Document symptoms and discharge date for advocacy packet"
+  ]
+}

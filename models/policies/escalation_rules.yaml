@@ -1,0 +1,27 @@
+# models/policies/escalation_rules.yaml
+escalation_triggers:
+  medical:
+    - condition: medical_risk >= 0.8
+      action: immediate_escalation
+      message: "Medical risk threshold exceeded — escalate to emergency care"
+    - condition: recent_discharge AND has_pain
+      action: contact_hospital_social_work
+      message: "Discharge-to-street — advocate for readmission or respite placement"
+  exposure:
+    - condition: exposure_risk >= 0.8 AND low_battery
+      action: immediate_routing
+      message: "Lethal exposure risk with communication constraint — route immediately"
+  document:
+    - condition: has_lost_documents AND referral_broken
+      action: generate_packet
+      message: "Administrative collapse — generate intake-ready packet"
+
+unsafe_to_defer:
+  - medical_risk >= 0.9
+  - exposure_risk >= 0.85
+  - has_pain AND recent_discharge AND no_shelter
+
+priority_thresholds:
+  high: 0.80
+  medium: 0.50
+  low: 0.0

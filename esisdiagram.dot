@@ -1,0 +1,604 @@
+digraph ESIS {
+
+  graph [
+    rankdir=TB,
+    newrank=true,
+    compound=true,
+    splines=polyline,
+    overlap=false,
+    concentrate=false,
+    pad=0.35,
+    nodesep=0.55,
+    ranksep=0.95,
+    bgcolor="#08111F",
+    fontname="Helvetica",
+    fontsize=11,
+    fontcolor="#F8FAFC",
+    labelloc="t",
+    labeljust="c",
+    label="ESIS — Edge Survival Intelligence System\nOffline Life-Safety Decision Engine\nPortrait Architecture Map: Perception → Decision → Action → Stabilization → Durable Exit"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Helvetica",
+    fontsize=10,
+    penwidth=1.4,
+    margin="0.10,0.08"
+  ];
+
+  edge [
+    fontname="Helvetica",
+    fontsize=9,
+    color="#A7B0C0",
+    fontcolor="#D7DDEA",
+    arrowsize=0.8,
+    penwidth=1.1
+  ];
+
+  // ============================================================
+  // PALETTE (IMAGE-1 / QMTF STYLE)
+  // ============================================================
+  // Background:        #08111F
+  // Header/Slate:      #172235 / #64748B
+  // Blue module:       #102B4C / #60A5FA
+  // Green module:      #0E3B2E / #34D399
+  // Gold module:       #4A3410 / #FBBF24
+  // Orange module:     #4A1F0D / #FB923C
+  // Teal module:       #0E2E36 / #2DD4BF
+  // Light text:        #F8FAFC
+  // Muted edge:        #A7B0C0
+
+  // ============================================================
+  // LAYOUT CONTROL ANCHORS
+  // ============================================================
+  L0 [shape=point, width=0, label="", style=invis];
+  C0 [shape=point, width=0, label="", style=invis];
+  R0 [shape=point, width=0, label="", style=invis];
+
+  L1 [shape=point, width=0, label="", style=invis];
+  C1a [shape=point, width=0, label="", style=invis];
+  R1 [shape=point, width=0, label="", style=invis];
+
+  L2 [shape=point, width=0, label="", style=invis];
+  C2a [shape=point, width=0, label="", style=invis];
+  R2 [shape=point, width=0, label="", style=invis];
+
+  { rank=same; L0; C0; R0; }
+  { rank=same; L1; C1a; R1; }
+  { rank=same; L2; C2a; R2; }
+
+  // ============================================================
+  // TOP HEADER / GLOBAL STRIP
+  // ============================================================
+  subgraph cluster_global {
+    label="Global Context / Inputs";
+    color="#64748B";
+    fontcolor="#F8FAFC";
+    penwidth=1.6;
+    style="rounded";
+
+    global_header [
+      fillcolor="#172235",
+      color="#64748B",
+      fontcolor="#F8FAFC",
+      label="Mission Context\n• reduce preventable homelessness mortality\n• compress time-to-safety\n• preserve dignity, privacy, and continuity\n• operate offline where cloud AI fails"
+    ];
+
+    global_constraints [
+      fillcolor="#172235",
+      color="#64748B",
+      fontcolor="#F8FAFC",
+      label="Global Constraints\n• no internet / weak signal / low battery\n• fragmented systems / missed referrals / lost paperwork\n• medical urgency / exposure / violence / transport limits"
+    ];
+
+    global_objective [
+      fillcolor="#172235",
+      color="#64748B",
+      fontcolor="#F8FAFC",
+      label="Global Objective\n• perception → state estimation → planning → verified action\n• immediate stabilization (0–72h)\n• durable exit pathway (weeks–months)"
+    ];
+  }
+
+  // ============================================================
+  // LEFT COLUMN — HUMAN / UI / TOOLS
+  // ============================================================
+  subgraph cluster_field {
+    label="1. Human + Field Reality Layer";
+    color="#60A5FA";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    user_profile [
+      fillcolor="#102B4C",
+      color="#60A5FA",
+      fontcolor="#F8FAFC",
+      label="User / Household Profile\n• individual, couple, disabled partner, elder, child context\n• trauma, safety, violence, mobility, privacy constraints\n• no-internet / low-battery / low-data realities"
+    ];
+
+    crisis_context [
+      fillcolor="#102B4C",
+      color="#60A5FA",
+      fontcolor="#F8FAFC",
+      label="Crisis Context\n• freezing weather / heat / exposure\n• discharge-to-street risk\n• pain, infection, overdose, suicidality, assault risk\n• eviction, theft, lost documents, transport barriers"
+    ];
+
+    field_inputs [
+      fillcolor="#102B4C",
+      color="#60A5FA",
+      fontcolor="#F8FAFC",
+      label="Observed Inputs\n• voice / text / image / symptoms / notices / IDs\n• optional GPS / coarse location / last safe waypoint\n• time, weather, shelter status, user preferences\n• current cash, meds, food, phone power, network support"
+    ];
+  }
+
+  subgraph cluster_ui {
+    label="2. ESIS User Interface Layer";
+    color="#60A5FA";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    mobile_ui [
+      fillcolor="#102B4C",
+      color="#60A5FA",
+      fontcolor="#F8FAFC",
+      label="Mobile / Edge UI\n• offline-first app\n• low-power safe mode\n• one-screen emergency mode\n• large text / simplified flows"
+    ];
+
+    voice_io [
+      fillcolor="#102B4C",
+      color="#60A5FA",
+      fontcolor="#F8FAFC",
+      label="Voice I/O\n• speech-to-text when available\n• text-to-speech guidance\n• accessibility-first interaction\n• trauma-sensitive phrasing"
+    ];
+
+    doc_capture [
+      fillcolor="#102B4C",
+      color="#60A5FA",
+      fontcolor="#F8FAFC",
+      label="Document / Camera Intake\n• notices, discharge papers, IDs, prescriptions\n• multimodal interpretation\n• on-device OCR / structured extraction"
+    ];
+
+    emergency_panel [
+      fillcolor="#102B4C",
+      color="#60A5FA",
+      fontcolor="#F8FAFC",
+      label="Emergency Guidance Panel\n• one-tap crisis pathway\n• immediate next 3 steps\n• clinical red-flag escalation\n• ultra-low cognitive load display"
+    ];
+  }
+
+  subgraph cluster_tools {
+    label="5. Operational Tooling Layer";
+    color="#FB923C";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    resource_lookup [
+      fillcolor="#4A1F0D",
+      color="#FB923C",
+      fontcolor="#F8FAFC",
+      label="Resource Lookup Tool\n• shelters / warming centers / clinics / food / legal aid\n• medical respite / recuperative care options\n• non-congregate / hotel / private-room pathways when available"
+    ];
+
+    routing_tool [
+      fillcolor="#4A1F0D",
+      color="#FB923C",
+      fontcolor="#F8FAFC",
+      label="Routing + Navigation Tool\n• offline route computation\n• safe waypoint selection\n• battery-aware routing\n• low-risk travel path suggestions"
+    ];
+
+    call_sms_tool [
+      fillcolor="#4A1F0D",
+      color="#FB923C",
+      fontcolor="#F8FAFC",
+      label="Call / SMS / Voicemail Tool\n• scripted advocacy calls\n• timed retry logic\n• fallback contacts\n• logging of outcomes and no-response events"
+    ];
+
+    packet_tool [
+      fillcolor="#4A1F0D",
+      color="#FB923C",
+      fontcolor="#F8FAFC",
+      label="Referral / Advocacy Packet Tool\n• discharge-to-street objection packet\n• symptom timeline\n• accommodation request\n• coordinated-entry / intake-ready summary"
+    ];
+
+    escalation_tool [
+      fillcolor="#4A1F0D",
+      color="#FB923C",
+      fontcolor="#F8FAFC",
+      label="Escalation Tool\n• overdose / sepsis / spinal / psychiatric red-flag flow\n• emergency decision checklist\n• do-not-delay triggers\n• preserve user dignity while accelerating care"
+    ];
+  }
+
+  // ============================================================
+  // CENTER COLUMN — GEMMA / MATH / PARTNERS
+  // ============================================================
+  subgraph cluster_gemma {
+    label="3. Gemma 4 Local Intelligence Layer";
+    color="#34D399";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    gemma_runtime [
+      fillcolor="#0E3B2E",
+      color="#34D399",
+      fontcolor="#F8FAFC",
+      label="Gemma 4 Runtime (On-Device)\n• local multimodal reasoning\n• structured output generation\n• long-context planning\n• zero cloud dependency at inference time"
+    ];
+
+    prompt_system [
+      fillcolor="#0E3B2E",
+      color="#34D399",
+      fontcolor="#F8FAFC",
+      label="Prompt / Instruction System\n• life-safety framing\n• constrained JSON outputs\n• advocacy packet templates\n• multilingual + faith-sensitive narrative modes"
+    ];
+
+    function_router [
+      fillcolor="#0E3B2E",
+      color="#34D399",
+      fontcolor="#F8FAFC",
+      label="Native Function Calling Router\n• schema-constrained tools\n• allowlisted local functions\n• no arbitrary execution\n• arguments validated before use"
+    ];
+
+    policy_guard [
+      fillcolor="#0E3B2E",
+      color="#34D399",
+      fontcolor="#F8FAFC",
+      label="Safety / Consent / Privacy Guard\n• explicit confirmation for high-risk actions\n• minimum-necessary data release\n• precise-location suppression mode\n• emergency override only under strict conditions"
+    ];
+  }
+
+  subgraph cluster_math {
+    label="4. Mathematical Decision Core";
+    color="#FBBF24";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    state_vector [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="State Vector x_t\n• cash, food security, housing risk, health risk\n• mobility, weather exposure, violence risk\n• documents, battery, connectivity, transport access\n• partner / dependent / disability / pet constraints"
+    ];
+
+    belief_state [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Belief State b_t(x)\n• partial observability\n• uncertainty over danger, availability, acceptance, response\n• confidence weighting of missing / conflicting information"
+    ];
+
+    action_space [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Candidate Action Space A_t\n• seek medical evaluation now\n• call 211 / outreach / hotline\n• pursue non-congregate placement path\n• conserve cash / charge phone / secure transport\n• restore documents / meds / continuity"
+    ];
+
+    monte_carlo [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Monte Carlo Outcome Engine\n• simulate N trajectories for each candidate plan\n• estimate stability, escalation, and failure probabilities\n• quantify time-to-safety and time-to-placement"
+    ];
+
+    risk_engine [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Risk-Sensitive Optimization\n• maximize E[G]\n• penalize CVaRα(Harm)\n• enforce chance constraints P(Harm72h > τ) ≤ ε\n• prioritize worst-night avoidance over average-case comfort"
+    ];
+
+    plan_selector [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Plan Selector\n• safest feasible plan under constraints\n• immediate stabilization plan (0–72h)\n• durable exit plan (weeks–months)\n• transparent explanation of why this plan won"
+    ];
+  }
+
+  subgraph cluster_partner {
+    label="8. System / Partner Interface Layer";
+    color="#2DD4BF";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    hotline_211 [
+      fillcolor="#0E2E36",
+      color="#2DD4BF",
+      fontcolor="#F8FAFC",
+      label="211 / Hotline Interface\n• referral backbone\n• emergency resource confirmation\n• multilingual handoff"
+    ];
+
+    coc_entry [
+      fillcolor="#0E2E36",
+      color="#2DD4BF",
+      fontcolor="#F8FAFC",
+      label="Coordinated Entry / Access Point Interface\n• intake-ready summaries\n• prioritization-support context\n• reduced repetitive trauma disclosure"
+    ];
+
+    clinical_partners [
+      fillcolor="#0E2E36",
+      color="#2DD4BF",
+      fontcolor="#F8FAFC",
+      label="Clinical / Respite Partner Interface\n• discharge objection packets\n• symptom timeline\n• recovery placement pathway\n• continuity of care bridge"
+    ];
+
+    housing_ops [
+      fillcolor="#0E2E36",
+      color="#2DD4BF",
+      fontcolor="#F8FAFC",
+      label="Housing / Hotel / Placement Ops Interface\n• non-congregate vacancy / intake path\n• private-room routing when available\n• accommodation / household matching"
+    ];
+
+    opportunistic_sync [
+      fillcolor="#0E2E36",
+      color="#2DD4BF",
+      fontcolor="#F8FAFC",
+      label="Opportunistic Sync Manager\n• signed pack updates\n• contact verification\n• policy refresh\n• no dependency on continuous connectivity"
+    ];
+  }
+
+  // ============================================================
+  // RIGHT COLUMN — DATA / GOVERNANCE / OUTCOMES
+  // ============================================================
+  subgraph cluster_data {
+    label="6. Offline Data Packs + Knowledge Substrate";
+    color="#FBBF24";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    resource_pack [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Geo-Specific Resource Pack\n• 211-like directory\n• shelters / food / clinics / legal aid\n• hours, eligibility, safety notes, contact methods"
+    ];
+
+    housing_pack [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Rapid Placement / Non-Congregate Pack\n• hotel / respite / bridge / private-room options\n• referral requirements\n• intake workflows\n• placement priority heuristics"
+    ];
+
+    hmis_pack [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="System Interface Pack\n• Coordinated Entry concepts\n• HMIS-compatible export schema\n• local policy notes\n• documentation checklist mappings"
+    ];
+
+    maps_pack [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Offline Maps + Travel Pack\n• vector tiles / routing graph\n• weather overlays when cached\n• charging / transit / safe-stop notes"
+    ];
+
+    mortality_pack [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Mortality / Intervention Evidence Pack\n• homelessness mortality literature\n• local death review insights\n• medical respite / Housing First / non-congregate intervention evidence"
+    ];
+
+    local_store [
+      fillcolor="#4A3410",
+      color="#FBBF24",
+      fontcolor="#F8FAFC",
+      label="Encrypted Local Store\n• user history, preferences, prior attempts\n• battery of cached packets and scripts\n• short retention windows + user control"
+    ];
+  }
+
+  subgraph cluster_governance {
+    label="7. Accountability, Ethics, and Governance";
+    color="#34D399";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    audit_log [
+      fillcolor="#0E3B2E",
+      color="#34D399",
+      fontcolor="#F8FAFC",
+      label="Tamper-Evident Audit Log\n• hash-chained event history\n• recommendations, actions, outcomes\n• consent receipts\n• preserves continuity without silent loss"
+    ];
+
+    fairness_layer [
+      fillcolor="#0E3B2E",
+      color="#34D399",
+      fontcolor="#F8FAFC",
+      label="Fairness / Bias Review Layer\n• do not replicate flawed intake scoring blindly\n• explanation-first recommendations\n• capture context omitted by blunt vulnerability tools"
+    ];
+
+    privacy_layer [
+      fillcolor="#0E3B2E",
+      color="#34D399",
+      fontcolor="#F8FAFC",
+      label="Privacy-by-Design Layer\n• minimum necessary principle\n• local-only by default\n• coarse location and victim-safety mode\n• inspect-before-share packet flow"
+    ];
+
+    risk_governance [
+      fillcolor="#0E3B2E",
+      color="#34D399",
+      fontcolor="#F8FAFC",
+      label="AI Risk Governance\n• NIST-style risk lifecycle thinking\n• identify / measure / mitigate / monitor\n• safety-critical use posture\n• human review where required"
+    ];
+  }
+
+  subgraph cluster_outcomes {
+    label="9. ESIS Intended Outcomes";
+    color="#FB923C";
+    fontcolor="#F8FAFC";
+    penwidth=1.8;
+    style="rounded";
+
+    immediate_outcomes [
+      fillcolor="#4A1F0D",
+      color="#FB923C",
+      fontcolor="#F8FAFC",
+      label="Immediate Outcomes (0–72h)\n• reduced exposure to lethal conditions\n• faster medical escalation when needed\n• reduced discharge-to-street failures\n• fewer missed calls / dead-end referrals"
+    ];
+
+    durable_outcomes [
+      fillcolor="#4A1F0D",
+      color="#FB923C",
+      fontcolor="#F8FAFC",
+      label="Durable Outcomes (Weeks–Months)\n• faster path to safe private stabilization\n• improved follow-through on system steps\n• reduced administrative drop-off\n• movement toward permanent housing"
+    ];
+
+    mission_outcome [
+      fillcolor="#4A1F0D",
+      color="#FB923C",
+      fontcolor="#F8FAFC",
+      label="Mission Outcome\n• compress time-to-safety\n• preserve dignity\n• reduce preventable homelessness mortality\n• make decision support available where cloud AI fails"
+    ];
+  }
+
+  // ============================================================
+  // COLUMN / ROW POSITIONING (NO DETAIL LOSS)
+  // ============================================================
+  L0 -> user_profile   [style=invis, weight=100];
+  C0 -> gemma_runtime  [style=invis, weight=100];
+  R0 -> resource_pack  [style=invis, weight=100];
+
+  L1 -> mobile_ui      [style=invis, weight=100];
+  C1a -> state_vector  [style=invis, weight=100];
+  R1 -> audit_log      [style=invis, weight=100];
+
+  L2 -> resource_lookup [style=invis, weight=100];
+  C2a -> hotline_211    [style=invis, weight=100];
+  R2 -> immediate_outcomes [style=invis, weight=100];
+
+  { rank=same; user_profile; gemma_runtime; resource_pack; }
+  { rank=same; crisis_context; prompt_system; housing_pack; }
+  { rank=same; field_inputs; function_router; hmis_pack; }
+  { rank=same; mobile_ui; state_vector; audit_log; }
+  { rank=same; voice_io; belief_state; fairness_layer; }
+  { rank=same; doc_capture; action_space; privacy_layer; }
+  { rank=same; emergency_panel; monte_carlo; risk_governance; }
+  { rank=same; resource_lookup; hotline_211; immediate_outcomes; }
+  { rank=same; routing_tool; coc_entry; durable_outcomes; }
+  { rank=same; call_sms_tool; clinical_partners; mission_outcome; }
+
+  // Additional invis chains to keep columns stacked
+  user_profile -> mobile_ui       [style=invis, weight=30];
+  mobile_ui    -> resource_lookup [style=invis, weight=30];
+
+  gemma_runtime -> state_vector   [style=invis, weight=30];
+  state_vector  -> hotline_211    [style=invis, weight=30];
+
+  resource_pack -> audit_log      [style=invis, weight=30];
+  audit_log     -> immediate_outcomes [style=invis, weight=30];
+
+  // ============================================================
+  // PRIMARY FLOWS
+  // ============================================================
+  global_header      -> user_profile      [ltail=cluster_global, lhead=cluster_field];
+  global_constraints -> crisis_context    [ltail=cluster_global, lhead=cluster_field];
+  global_objective   -> field_inputs      [ltail=cluster_global, lhead=cluster_field];
+
+  global_header      -> gemma_runtime     [ltail=cluster_global, lhead=cluster_gemma, style=dashed];
+  global_constraints -> state_vector      [ltail=cluster_global, lhead=cluster_math, style=dashed];
+  global_objective   -> resource_pack     [ltail=cluster_global, lhead=cluster_data, style=dashed];
+
+  user_profile   -> mobile_ui;
+  crisis_context -> mobile_ui;
+  field_inputs   -> mobile_ui;
+
+  voice_io        -> mobile_ui;
+  doc_capture     -> mobile_ui;
+  emergency_panel -> mobile_ui;
+
+  mobile_ui      -> gemma_runtime [label="structured context"];
+  prompt_system  -> gemma_runtime [label="system constraints"];
+  gemma_runtime  -> function_router [label="tool proposals / JSON"];
+  function_router -> policy_guard [label="validated call args"];
+
+  mobile_ui      -> state_vector [label="observations o_t"];
+  state_vector   -> belief_state;
+  belief_state   -> action_space;
+  action_space   -> monte_carlo;
+  monte_carlo    -> risk_engine;
+  risk_engine    -> plan_selector;
+
+  plan_selector  -> policy_guard [label="recommended plan"];
+  policy_guard   -> resource_lookup;
+  policy_guard   -> routing_tool;
+  policy_guard   -> call_sms_tool;
+  policy_guard   -> packet_tool;
+  policy_guard   -> escalation_tool;
+
+  resource_pack  -> gemma_runtime [label="offline RAG context"];
+  housing_pack   -> resource_lookup;
+  hmis_pack      -> packet_tool;
+  maps_pack      -> routing_tool;
+  mortality_pack -> risk_engine;
+  local_store    -> belief_state [label="history / prior outcomes"];
+  local_store    -> gemma_runtime [label="cached context"];
+
+  policy_guard    -> audit_log [label="decision receipt"];
+  resource_lookup -> audit_log [label="resource selected"];
+  routing_tool    -> audit_log [label="route generated"];
+  call_sms_tool   -> audit_log [label="contact attempt"];
+  packet_tool     -> audit_log [label="packet created"];
+  escalation_tool -> audit_log [label="escalation triggered"];
+
+  fairness_layer  -> policy_guard;
+  privacy_layer   -> policy_guard;
+  risk_governance -> policy_guard;
+  audit_log       -> local_store;
+
+  packet_tool       -> hotline_211        [label="optional handoff"];
+  packet_tool       -> coc_entry          [label="optional handoff"];
+  packet_tool       -> clinical_partners  [label="optional handoff"];
+  packet_tool       -> housing_ops        [label="optional handoff"];
+
+  opportunistic_sync -> resource_pack;
+  opportunistic_sync -> housing_pack;
+  opportunistic_sync -> hmis_pack;
+  opportunistic_sync -> maps_pack;
+
+  hotline_211       -> opportunistic_sync [style=dashed, label="updates"];
+  coc_entry         -> opportunistic_sync [style=dashed, label="workflow changes"];
+  clinical_partners -> opportunistic_sync [style=dashed, label="partner updates"];
+  housing_ops       -> opportunistic_sync [style=dashed, label="inventory/process updates"];
+
+  escalation_tool -> immediate_outcomes;
+  routing_tool    -> immediate_outcomes;
+  call_sms_tool   -> immediate_outcomes;
+  packet_tool     -> durable_outcomes;
+  coc_entry       -> durable_outcomes;
+  housing_ops     -> durable_outcomes;
+
+  immediate_outcomes -> mission_outcome;
+  durable_outcomes   -> mission_outcome;
+
+  // ============================================================
+  // FEEDBACK LOOPS
+  // ============================================================
+  call_sms_tool     -> belief_state [style=dashed, label="response / no-answer / denial"];
+  routing_tool      -> belief_state [style=dashed, label="arrival / blocked path / delay"];
+  escalation_tool   -> belief_state [style=dashed, label="clinical outcome"];
+  hotline_211       -> belief_state [style=dashed, label="resource confirmation"];
+  coc_entry         -> belief_state [style=dashed, label="intake progress"];
+  clinical_partners -> belief_state [style=dashed, label="placement / discharge result"];
+  housing_ops       -> belief_state [style=dashed, label="availability / acceptance"];
+
+  // ============================================================
+  // EXTRA CROSS-COLUMN STRUCTURAL HINTS
+  // ============================================================
+  user_profile   -> gemma_runtime  [style=invis, weight=2];
+  gemma_runtime  -> resource_pack  [style=invis, weight=2];
+  mobile_ui      -> state_vector   [style=invis, weight=2];
+  state_vector   -> audit_log      [style=invis, weight=2];
+  resource_lookup -> hotline_211   [style=invis, weight=2];
+  hotline_211     -> immediate_outcomes [style=invis, weight=2];
+}
