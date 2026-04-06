@@ -1,0 +1,33 @@
+{
+  "raw_text": "I was wrongfully kicked out of my medical respite voucher.  The following day the homeless program kicked me out of the entire program.  I went to the ER 6 times in 7 weeks and they have constantly misdiagnosed me, and this last time they refused to even give me the referral i needed to get continued medical respite voucher for the upcoming week.  I let the homeless program know if I die or am harmed from this, I am going to open litigation.  I am in the freezing cold, the homeless program wont help me, I have no winter clothing, nightfall is coming, and I am disabled.  I have no friends or family I can call for support.  I have no bus passes for transportation, and the homeless program was paying for my mobile phone, a flip phone, which is now turned off.  The ER room nearby is just going to tell me the same thing that they have done all they can do, despite my letting them know the pain is getting much worse every week, they look at my like I am lying just to use the system for as free voucher for a place to stay.  That is not the case, I can barely climb in and out of bed, let alone sleep on a concrete sidewalk in 22 degree weather.  All of my belongings were stolen the first night, after i was kicked out of the respite voucher hotel room which I stayed at for 2 weeks.  Without being able to call the homeless program since they kicked me out, and with the hospital ER misdiagnosing me, what should I do?  I desperately need housing before I die in a gutter somewhere.",
+  "has_pain": true,
+  "has_exposure_risk": true,
+  "has_shelter": false,
+  "has_lost_documents": false,
+  "low_battery": true,
+  "low_funds": true,
+  "no_transport": true,
+  "recent_discharge": true,
+  "cannot_congregate": true,
+  "chronic_homeless": true,
+  "is_disabled": true,
+  "is_woman_with_minor_children": false,
+  "has_life_threatening_condition": false,
+  "has_employment": false,
+  "is_known_substance_user": false,
+  "is_elderly": true,
+  "months_homeless": 18,
+  "education_level": "phd",
+  "professional_background": "Software engineer, physicist, Christian Pastor",
+  "skills_summary": "Python, C++, CUDA, FinTech, DSP, Licensing disruptive technologies",
+  "resource_needs": [
+    "sleeping_bag",
+    "tent",
+    "food",
+    "clothing",
+    "laptop",
+    "cooler"
+  ],
+  "saved_zip": "80233",
+  "saved_gps": "39.7392, -104.9903"
+}

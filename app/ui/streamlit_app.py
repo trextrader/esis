@@ -583,6 +583,15 @@ with st.expander("💾  Save this scenario for later", expanded=False):
             st.success(f"Saved as **{path.stem}** — it will appear in the dropdown on next load.")
 
 # ── LOCATION INPUT ───────────────────────────────────────────────────
+# Seed session_state from saved case ONCE (only when a saved case is loaded
+# and the key is not yet set for this session, or the case provides a value).
+_saved_zip = case_data.get("saved_zip", "")
+_saved_gps = case_data.get("saved_gps", "")
+if _saved_zip and st.session_state.get("loc_zip", "") == "":
+    st.session_state["loc_zip"] = _saved_zip
+if _saved_gps and st.session_state.get("loc_gps", "") == "":
+    st.session_state["loc_gps"] = _saved_gps
+
 st.markdown('<div class="esis-section-label" style="margin-top:0.8rem">Location</div>', unsafe_allow_html=True)
 st.subheader("📍 Where are you? *(optional — enables resource map)*")
 
@@ -591,9 +600,9 @@ loc_col1, loc_col2 = st.columns([1, 2])
 with loc_col1:
     zip_input = st.text_input(
         "ZIP code",
-        value=case_data.get("saved_zip", ""),
         max_chars=5,
         placeholder="e.g. 80202",
+        key="loc_zip",
         help="Enter a Colorado ZIP code to find nearby resources",
     )
 
@@ -609,8 +618,8 @@ with loc_col2:
     )
     gps_input = st.text_input(
         "GPS coordinates (lat, lng)",
-        value=case_data.get("saved_gps", ""),
         placeholder="39.7392, -104.9903",
+        key="loc_gps",
         help="GPS is more accurate than ZIP code. Paste from your phone's maps app.",
     )
 
