@@ -1,13 +1,14 @@
 from __future__ import annotations
 # app/services/audit_service.py
 from app.api.schemas import StructuredCase, RiskAssessment, RecommendationOutput
-from typing import List
+from typing import List, Optional
 
 
 def generate_audit(
     case: StructuredCase,
     risk: RiskAssessment,
     recommendation: RecommendationOutput,
+    primary_pathway: Optional[str] = None,
 ) -> dict:
     triggered_flags: List[str] = []
     if risk.medical_risk >= 0.8:
@@ -21,7 +22,7 @@ def generate_audit(
 
     active_constraints = [k for k, v in case.constraints.items() if v]
     suppressed = [d for d in ["medical", "exposure", "documents"] if d not in case.risk_domains]
-    primary = case.risk_domains[0] if case.risk_domains else "general"
+    primary = primary_pathway or (case.risk_domains[0] if case.risk_domains else "general")
 
     return {
         "case_id": case.case_id,

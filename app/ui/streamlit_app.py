@@ -120,8 +120,9 @@ if analyze_btn:
         risk = score_risk(structured)
         recommendation = generate_recommendation(structured, risk, hf_token=HF_TOKEN or None)
         packet = generate_packet(structured, risk, recommendation)
-        audit = generate_audit(structured, risk, recommendation)
         routing = select_pathway(structured, risk)
+        audit = generate_audit(structured, risk, recommendation,
+                               primary_pathway=routing["primary_pathway"])
 
     st.divider()
 

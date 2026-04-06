@@ -55,12 +55,19 @@ def _fallback_output(case: StructuredCase, risk: RiskAssessment) -> Recommendati
         actions.append("Find indoor shelter or warming center now")
     if risk.documentation_risk >= 0.5:
         actions.append("Generate referral packet and begin ID replacement process")
-    if not actions:
-        actions = [
-            "Contact 211 for immediate resource referral",
-            "Document your current situation in writing",
-            "Identify the nearest support services",
-        ]
+    if risk.medical_risk >= 0.5 and "Seek emergency medical evaluation immediately — do not delay" not in actions:
+        actions.append("Contact hospital social worker to document repeated misdiagnosis and request escalation")
+
+    # Always ensure at least 3 actions
+    defaults = [
+        "Contact 211 for immediate resource referral",
+        "Document your current situation in writing",
+        "Identify the nearest support services and walk there now",
+    ]
+    for d in defaults:
+        if len(actions) >= 3:
+            break
+        actions.append(d)
 
     domains_str = ", ".join(case.risk_domains) if case.risk_domains else "general support"
     return RecommendationOutput(
