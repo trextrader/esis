@@ -1,6 +1,6 @@
 from __future__ import annotations
 # app/api/schemas.py
-from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional, List, Dict
 import uuid
 from datetime import datetime
@@ -30,8 +30,6 @@ class StructuredCase(BaseModel):
 
 
 class RiskAssessment(BaseModel):
-    model_config = ConfigDict(validate_assignment=True)
-
     medical_risk: float = 0.0
     exposure_risk: float = 0.0
     documentation_risk: float = 0.0
@@ -46,13 +44,10 @@ class RiskAssessment(BaseModel):
     @model_validator(mode="after")
     def compute_priority(self) -> RiskAssessment:
         max_risk = max(self.medical_risk, self.exposure_risk, self.documentation_risk)
-        if max_risk >= 0.8:
-            self.overall_priority = "high"
-        elif max_risk >= 0.5:
-            self.overall_priority = "medium"
-        else:
-            self.overall_priority = "low"
-        self.requires_escalation = max_risk >= 0.8
+        priority = "high" if max_risk >= 0.8 else "medium" if max_risk >= 0.5 else "low"
+        # Use object.__setattr__ to avoid triggering recursive validation
+        object.__setattr__(self, "overall_priority", priority)
+        object.__setattr__(self, "requires_escalation", max_risk >= 0.8)
         return self
 
 
