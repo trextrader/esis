@@ -109,13 +109,17 @@ def priority_resources_for_risk(
     # Pull physical nearby resources (distance-based)
     all_nearby = nearest_resources(lat, lng, max_km=max_km, limit=20)
 
-    # Also always include statewide resources (transport, HUD, vouchers) — no distance filter
+    # Include statewide resources (transport, HUD, vouchers) — no distance filter.
+    # Only include resources whose address is explicitly "Statewide" or "App-based"
+    # so physical locations far away (e.g. Pueblo walk-in center) are never force-included.
     db = _load()
     statewide = [
         r for r in db["resources"]
         if r["type"] in ("transportation", "emergency_lodging", "housing", "crisis_line")
         and r not in all_nearby
         and haversine_km(lat, lng, r["lat"], r["lng"]) > max_km
+        and any(kw in r.get("address", "").lower()
+                for kw in ("statewide", "app-based", "phone only", "federal"))
     ]
     for r in statewide:
         r_copy = dict(r)

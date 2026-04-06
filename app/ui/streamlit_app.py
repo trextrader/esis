@@ -1147,7 +1147,13 @@ if analyze_btn:
         for r in physical_resources[:8]:
             icon = RESOURCE_ICONS.get(r["type"], "📍")
             dist_mi = r.get("distance_mi", 0)
-            dist_label = "Statewide" if dist_mi == 0 else f"{dist_mi} mi"
+            addr = r.get("address", "").lower()
+            if dist_mi == 0 and any(k in addr for k in ("statewide", "app-based", "phone only", "federal")):
+                dist_label = "Phone / App"
+            elif dist_mi == 0:
+                dist_label = "Statewide"
+            else:
+                dist_label = f"{dist_mi} mi"
             hours = r.get("hours", "")
             services_str = ", ".join(r.get("services", [])[:3])
             notes = r.get("notes", "")
