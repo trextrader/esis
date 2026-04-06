@@ -164,28 +164,277 @@ st.set_page_config(
     layout="wide",
 )
 
+# ── GLOBAL CSS THEME ─────────────────────────────────────────────────
+st.markdown("""
+<style>
+/* ── Base app background ── */
+.stApp {
+    background: #060D18;
+}
+
+/* ── Hide Streamlit chrome ── */
+#MainMenu, footer, header { visibility: hidden; }
+.block-container {
+    padding-top: 1rem;
+    padding-bottom: 3rem;
+    max-width: 1280px;
+}
+
+/* ── Typography ── */
+html, body, [class*="css"] {
+    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+                 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── Subheaders ── */
+h2, h3 { color: #F1F5F9 !important; letter-spacing: -0.01em; }
+
+/* ── Section label pill ── */
+.esis-section-label {
+    display: inline-block;
+    background: linear-gradient(135deg, #1E3A5F 0%, #0F2744 100%);
+    color: #60A5FA;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #2563EB33;
+    margin-bottom: 0.4rem;
+}
+
+/* ── Card component ── */
+.esis-card {
+    background: #0D1B2E;
+    border: 1px solid #1E3A5F;
+    border-radius: 10px;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 0.8rem;
+    transition: border-color 0.2s;
+}
+.esis-card:hover { border-color: #2563EB; }
+
+/* ── Risk metric card ── */
+.risk-card {
+    background: #0D1B2E;
+    border: 1px solid #1E3A5F;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    text-align: center;
+}
+.risk-card .risk-label {
+    color: #94A3B8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+}
+.risk-card .risk-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+}
+.risk-card .risk-bar-bg {
+    background: #1E293B;
+    border-radius: 4px;
+    height: 6px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+.risk-card .risk-bar-fill {
+    height: 6px;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+/* ── Priority badge ── */
+.priority-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.priority-high   { background:#EF444422; color:#EF4444; border:1px solid #EF444466; }
+.priority-medium { background:#F59E0B22; color:#F59E0B; border:1px solid #F59E0B66; }
+.priority-low    { background:#10B98122; color:#10B981; border:1px solid #10B98166; }
+
+/* ── Track score ring ── */
+.track-ring {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 800;
+    margin: 0 auto 0.6rem;
+}
+
+/* ── Action item ── */
+.action-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.65rem 0.9rem;
+    background: #0A1628;
+    border-left: 3px solid #3B82F6;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 0.5rem;
+}
+.action-num {
+    background: #3B82F6;
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    min-width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.action-text { color: #E2E8F0; font-size: 0.9rem; line-height: 1.5; }
+
+/* ── Contact badge ── */
+.contact-badge {
+    background: #0F172A;
+    border: 1px solid #1E3A5F;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+.contact-badge .cb-label { color: #64748B; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.contact-badge .cb-number { color: #60A5FA; font-size: 1.15rem; font-weight: 700; margin: 2px 0; }
+.contact-badge .cb-desc { color: #94A3B8; font-size: 0.75rem; }
+
+/* ── Inputs ── */
+.stTextInput input, .stTextArea textarea, .stNumberInput input {
+    background: #0D1B2E !important;
+    border: 1px solid #1E3A5F !important;
+    color: #F1F5F9 !important;
+    border-radius: 8px !important;
+}
+.stTextInput input:focus, .stTextArea textarea:focus {
+    border-color: #3B82F6 !important;
+    box-shadow: 0 0 0 2px #3B82F633 !important;
+}
+
+/* ── Selectbox ── */
+.stSelectbox > div > div {
+    background: #0D1B2E !important;
+    border: 1px solid #1E3A5F !important;
+    color: #F1F5F9 !important;
+}
+
+/* ── Primary button ── */
+.stButton > button[kind="primary"] {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    padding: 0.7rem 2rem !important;
+    border-radius: 8px !important;
+    letter-spacing: 0.02em !important;
+    box-shadow: 0 4px 14px #2563EB44 !important;
+    transition: all 0.2s !important;
+}
+.stButton > button[kind="primary"]:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px #2563EB66 !important;
+}
+
+/* ── Checkboxes ── */
+.stCheckbox label { color: #CBD5E1 !important; }
+
+/* ── Expander ── */
+.streamlit-expanderHeader {
+    background: #0D1B2E !important;
+    border: 1px solid #1E3A5F !important;
+    border-radius: 8px !important;
+    color: #94A3B8 !important;
+}
+.streamlit-expanderContent {
+    background: #0A1525 !important;
+    border: 1px solid #1E3A5F !important;
+    border-top: none !important;
+}
+
+/* ── Progress bar ── */
+.stProgress > div > div > div { background: #1E3A5F !important; }
+.stProgress > div > div > div > div { border-radius: 4px !important; }
+
+/* ── Divider ── */
+hr { border-color: #1E3A5F !important; }
+
+/* ── Alert boxes ── */
+.stAlert { border-radius: 8px !important; }
+
+/* ── Caption / small text ── */
+.stCaption { color: #475569 !important; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0D1B2E; }
+::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2563EB; }
+</style>
+""", unsafe_allow_html=True)
+
 # ── HEADER ───────────────────────────────────────────────────────────
-hdr_left, hdr_right = st.columns([1, 5])
-with hdr_left:
-    if LOGO_PATH.exists():
-        st.image(str(LOGO_PATH), width=110)
-with hdr_right:
-    st.markdown(
-        """
-        <div style='background:#08111F;padding:1.5rem 2rem;border-radius:8px;
-                    margin-bottom:1.2rem;border:1px solid #1E3A5F'>
-            <h1 style='color:#F8FAFC;margin:0;font-size:2rem'>ESIS</h1>
-            <p style='color:#94A3B8;margin:0.3rem 0 0'>
-                Edge Survival Intelligence System —
-                Offline-first crisis navigation powered by Gemma 4
-            </p>
+logo_b64 = ""
+if LOGO_PATH.exists():
+    import base64
+    with open(LOGO_PATH, "rb") as _f:
+        logo_b64 = base64.b64encode(_f.read()).decode()
+
+st.markdown(f"""
+<div style='
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, #060D18 0%, #0D1B2E 50%, #060D18 100%);
+    border: 1px solid #1E3A5F;
+    border-radius: 12px;
+    padding: 1.2rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 24px #00000066, inset 0 1px 0 #ffffff08;
+'>
+    {'<img src="data:image/png;base64,' + logo_b64 + '" style="height:64px;width:auto;border-radius:8px;flex-shrink:0;" />' if logo_b64 else '<span style="font-size:2.5rem">🛟</span>'}
+    <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap">
+            <span style="color:#F8FAFC;font-size:1.9rem;font-weight:800;letter-spacing:-0.02em">ESIS</span>
+            <span style="
+                background:#1E3A5F;color:#60A5FA;
+                font-size:0.65rem;font-weight:700;letter-spacing:0.12em;
+                text-transform:uppercase;padding:3px 10px;border-radius:20px;
+                border:1px solid #2563EB44
+            ">Gemma 4 Powered</span>
+            <span style="
+                background:#0D2E1A;color:#10B981;
+                font-size:0.65rem;font-weight:700;letter-spacing:0.12em;
+                text-transform:uppercase;padding:3px 10px;border-radius:20px;
+                border:1px solid #10B98144
+            ">Offline-First</span>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+        <div style="color:#64748B;font-size:0.9rem;margin-top:0.25rem">
+            Edge Survival Intelligence System &nbsp;·&nbsp; Risk-constrained crisis navigation
+            &nbsp;·&nbsp; Built with lived experience
+        </div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+        <div style="color:#1E3A5F;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em">Hackathon</div>
+        <div style="color:#3B82F6;font-weight:700;font-size:0.85rem">Gemma 4 Good 2026</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ── SCREEN 1: INPUT ──────────────────────────────────────────────────
-st.subheader("1  Describe the Situation")
+st.markdown('<div class="esis-section-label">Step 1</div>', unsafe_allow_html=True)
+st.subheader("Describe the Situation")
 
 col_left, col_right = st.columns([2, 1])
 
@@ -230,7 +479,8 @@ with col_right:
     )
 
 # ── LOCATION INPUT ───────────────────────────────────────────────────
-st.subheader("📍  Location (optional — improves resource matching)")
+st.markdown('<div class="esis-section-label" style="margin-top:0.8rem">Location</div>', unsafe_allow_html=True)
+st.subheader("📍 Where are you? *(optional — enables resource map)*")
 
 loc_col1, loc_col2 = st.columns([1, 2])
 
@@ -446,39 +696,82 @@ if analyze_btn:
     st.divider()
 
     # ── SCREEN 2: RISK ASSESSMENT ─────────────────────────────────
-    st.subheader("2  Risk Assessment")
+    st.markdown('<div class="esis-section-label">Step 2</div>', unsafe_allow_html=True)
+    st.subheader("Risk Assessment")
 
+    # Priority banner
+    p = risk.overall_priority
     if risk.requires_escalation:
-        st.error(f"⚠️  ESCALATION REQUIRED — {risk.overall_priority.upper()} PRIORITY")
-    elif risk.overall_priority == "medium":
-        st.warning(f"Priority: {risk.overall_priority.upper()}")
+        st.markdown("""
+        <div style='background:#1A0808;border:1px solid #EF4444;border-radius:8px;
+                    padding:0.9rem 1.2rem;display:flex;align-items:center;gap:0.8rem'>
+            <span style='font-size:1.4rem'>⚠️</span>
+            <div>
+                <span style='color:#EF4444;font-weight:800;font-size:1rem;
+                             text-transform:uppercase;letter-spacing:0.05em'>
+                    Escalation Required
+                </span>
+                <span style='color:#FCA5A5;font-size:0.85rem;margin-left:0.5rem'>
+                    HIGH PRIORITY — Immediate intervention needed
+                </span>
+            </div>
+        </div>""", unsafe_allow_html=True)
     else:
-        st.info(f"Priority: {risk.overall_priority.upper()}")
+        badge_class = "priority-medium" if p == "medium" else "priority-low"
+        st.markdown(f"""
+        <div style='background:#0D1B2E;border:1px solid #1E3A5F;border-radius:8px;
+                    padding:0.7rem 1.2rem;display:inline-flex;align-items:center;gap:0.6rem'>
+            <span class="priority-badge {badge_class}">{p.upper()}</span>
+            <span style='color:#94A3B8;font-size:0.85rem'>overall priority</span>
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
+
+    # Risk metric cards
+    def _risk_card(label: str, score: float, icon: str) -> str:
+        c = risk_bar_color(score)
+        pct = int(score * 100)
+        return f"""
+        <div class="risk-card">
+            <div class="risk-label">{icon} {label}</div>
+            <div class="risk-value" style="color:{c}">{pct}%</div>
+            <div class="risk-bar-bg">
+                <div class="risk-bar-fill" style="width:{pct}%;background:{c}"></div>
+            </div>
+        </div>"""
 
     r1, r2, r3 = st.columns(3)
     with r1:
-        c = risk_bar_color(risk.medical_risk)
-        st.markdown("**Medical Risk**")
-        st.progress(risk.medical_risk)
-        st.markdown(f"<span style='color:{c};font-weight:bold'>{risk.medical_risk:.0%}</span>",
-                    unsafe_allow_html=True)
+        st.markdown(_risk_card("Medical Risk", risk.medical_risk, "🩺"), unsafe_allow_html=True)
     with r2:
-        c = risk_bar_color(risk.exposure_risk)
-        st.markdown("**Exposure Risk**")
-        st.progress(risk.exposure_risk)
-        st.markdown(f"<span style='color:{c};font-weight:bold'>{risk.exposure_risk:.0%}</span>",
-                    unsafe_allow_html=True)
+        st.markdown(_risk_card("Exposure Risk", risk.exposure_risk, "🌡️"), unsafe_allow_html=True)
     with r3:
-        c = risk_bar_color(risk.documentation_risk)
-        st.markdown("**Documentation Risk**")
-        st.progress(risk.documentation_risk)
-        st.markdown(f"<span style='color:{c};font-weight:bold'>{risk.documentation_risk:.0%}</span>",
-                    unsafe_allow_html=True)
+        st.markdown(_risk_card("Documentation Risk", risk.documentation_risk, "📋"), unsafe_allow_html=True)
 
-    st.markdown(f"**Primary pathway:** `{routing['primary_pathway']}`")
-    st.markdown(f"**First contact:** {routing['contacts']['first_contact']}")
+    st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+
+    pathway_col, contact_col = st.columns([1, 2])
+    with pathway_col:
+        st.markdown(f"""
+        <div class="esis-card" style="padding:0.7rem 1rem">
+            <div style="color:#64748B;font-size:0.7rem;text-transform:uppercase;
+                        letter-spacing:0.1em;margin-bottom:0.2rem">Primary Pathway</div>
+            <div style="color:#60A5FA;font-weight:700;font-size:0.95rem">
+                {routing['primary_pathway']}
+            </div>
+        </div>""", unsafe_allow_html=True)
+    with contact_col:
+        st.markdown(f"""
+        <div class="esis-card" style="padding:0.7rem 1rem">
+            <div style="color:#64748B;font-size:0.7rem;text-transform:uppercase;
+                        letter-spacing:0.1em;margin-bottom:0.2rem">First Contact</div>
+            <div style="color:#E2E8F0;font-size:0.9rem">
+                {routing['contacts']['first_contact']}
+            </div>
+        </div>""", unsafe_allow_html=True)
+
     if routing.get("battery_mode"):
-        st.warning("Battery conservation mode active — route optimized for minimal steps")
+        st.warning("🔋 Battery conservation mode — route optimized for minimal steps")
 
     st.divider()
 
@@ -492,94 +785,172 @@ if analyze_btn:
     ])
 
     if has_profile_data:
-        st.subheader("2b  Housing Track Assignment")
+        st.markdown('<div class="esis-section-label">Step 2b</div>', unsafe_allow_html=True)
+        st.subheader("Housing Track Assignment")
 
-        # Priority score badge
         score = housing_track.priority_score
         score_color = "#EF4444" if score >= 70 else "#F59E0B" if score >= 40 else "#10B981"
-        st.markdown(
-            f"""
-            <div style='background:#0F172A;border:1px solid {score_color};border-radius:8px;
-                        padding:1rem 1.5rem;margin-bottom:1rem'>
-                <span style='color:{score_color};font-size:1.4rem;font-weight:bold'>
-                    Priority Score: {score}/100
-                </span>
-                &nbsp;&nbsp;
-                <span style='color:#F8FAFC;font-size:1.1rem'>
-                    Track: {housing_track.track_name}
-                </span>
+        score_bg = "#1A0808" if score >= 70 else "#1A1200" if score >= 40 else "#061A0E"
+
+        # Track header card
+        st.markdown(f"""
+        <div style='background:{score_bg};border:1px solid {score_color}44;border-radius:10px;
+                    padding:1.2rem 1.5rem;margin-bottom:1rem;
+                    display:flex;align-items:center;gap:1.5rem'>
+            <div style='
+                width:72px;height:72px;border-radius:50%;flex-shrink:0;
+                background:conic-gradient({score_color} {score * 3.6}deg, #1E293B 0deg);
+                display:flex;align-items:center;justify-content:center;
+                box-shadow:0 0 20px {score_color}44
+            '>
+                <div style='width:54px;height:54px;border-radius:50%;background:{score_bg};
+                            display:flex;align-items:center;justify-content:center;
+                            color:{score_color};font-size:1.1rem;font-weight:800'>
+                    {score}
+                </div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+            <div>
+                <div style='color:#94A3B8;font-size:0.7rem;text-transform:uppercase;
+                            letter-spacing:0.1em'>Housing Track</div>
+                <div style='color:#F1F5F9;font-size:1.1rem;font-weight:700;margin-top:0.15rem'>
+                    {housing_track.track_name}
+                </div>
+                <div style='color:{score_color};font-size:0.8rem;margin-top:0.2rem'>
+                    Priority score {score}/100
+                </div>
+            </div>
+        </div>""", unsafe_allow_html=True)
 
-        # Why this track
+        # Rationale pills
         if housing_track.rationale:
-            st.markdown("**Why this track was assigned:**")
-            for r in housing_track.rationale:
-                st.markdown(f"- {r}")
+            pills_html = "".join(
+                f"<span style='display:inline-block;background:#0D1B2E;color:#94A3B8;"
+                f"border:1px solid #1E3A5F;border-radius:20px;font-size:0.75rem;"
+                f"padding:3px 12px;margin:3px 3px 3px 0'>{r}</span>"
+                for r in housing_track.rationale
+            )
+            st.markdown(f"<div style='margin-bottom:0.8rem'>{pills_html}</div>", unsafe_allow_html=True)
 
-        # Immediate actions for this track
+        # Immediate actions
         with st.expander(f"🎯  Immediate Actions — {housing_track.track_name}", expanded=True):
-            for i, action in enumerate(housing_track.immediate_actions, 1):
-                st.markdown(f"**{i}.** {action}")
+            actions_html = "".join(
+                f"<div class='action-item'>"
+                f"<div class='action-num'>{i}</div>"
+                f"<div class='action-text'>{action}</div>"
+                f"</div>"
+                for i, action in enumerate(housing_track.immediate_actions, 1)
+            )
+            st.markdown(actions_html, unsafe_allow_html=True)
 
         # Target programs
         with st.expander("🏛️  Target Housing Programs"):
             for prog in housing_track.target_programs:
                 st.markdown(f"- {prog}")
-            st.caption(f"Estimated timeline: {housing_track.estimated_timeline}")
+            st.markdown(
+                f"<div style='color:#64748B;font-size:0.8rem;margin-top:0.5rem'>"
+                f"⏱️ {housing_track.estimated_timeline}</div>",
+                unsafe_allow_html=True,
+            )
 
         # Physical resource needs
         if profile.resource_needs:
-            with st.expander("🎒  Physical Resource Needs — Where to Get Them"):
+            with st.expander("🎒  Physical Resources — Where to Get Them Now"):
                 resource_info = get_resource_programs(profile.resource_needs)
                 for need_key, info in resource_info.items():
-                    st.markdown(f"**{info['name']}**")
-                    for src in info["sources"]:
-                        st.markdown(f"  - {src}")
+                    st.markdown(f"""
+                    <div class="esis-card" style="margin-bottom:0.6rem">
+                        <div style="color:#60A5FA;font-weight:600;margin-bottom:0.4rem">
+                            {info['name']}
+                        </div>
+                        {''.join(f"<div style='color:#94A3B8;font-size:0.82rem;margin:2px 0'>→ {src}</div>" for src in info['sources'])}
+                    </div>""", unsafe_allow_html=True)
 
-        # Disability application
+        # Disability application alert
         if profile.is_disabled and not profile.disability_application_started:
-            st.error(
-                "⚠️  **SSI/SSDI Application Not Started** — Every day without an application "
-                "is a day of lost retroactive income. SOAR-trained workers can get you approved "
-                "in 60–90 days vs. the standard 18-month process. Call 211 today and ask for "
-                "a SOAR case manager."
-            )
+            st.markdown("""
+            <div style='background:#1A0808;border:1px solid #EF4444;border-radius:8px;
+                        padding:0.9rem 1.2rem;margin:0.5rem 0'>
+                <div style='color:#EF4444;font-weight:700;margin-bottom:0.3rem'>
+                    ⚠️ SSI/SSDI Application Not Started
+                </div>
+                <div style='color:#FCA5A5;font-size:0.85rem'>
+                    Every day without an application is a day of lost retroactive income.
+                    SOAR-trained workers can get you approved in 60–90 days vs. 18 months standard.
+                    <strong>Call 211 today and ask for a SOAR case manager.</strong>
+                </div>
+            </div>""", unsafe_allow_html=True)
 
         # Community ping
         if profile.consent_community_ping and housing_track.community_ping_message:
-            st.divider()
-            st.subheader("📡  Community Ping — Ready to Share")
-            st.caption(
-                "Copy and post this to Nextdoor, your neighborhood Facebook group, LinkedIn, "
-                "or any local community network. Real community members often have exactly what you need."
-            )
+            st.markdown('<div style="height:0.5rem"></div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div style='display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem'>
+                <span style='font-size:1.1rem'>📡</span>
+                <span style='color:#F1F5F9;font-size:1rem;font-weight:700'>Community Ping — Ready to Share</span>
+            </div>
+            <div style='color:#64748B;font-size:0.82rem;margin-bottom:0.5rem'>
+                Post to Nextdoor, neighborhood Facebook groups, LinkedIn, or local mutual aid networks.
+                The community has resources that the system doesn't.
+            </div>""", unsafe_allow_html=True)
             ping_text = housing_track.community_ping_message
-            st.text_area("Community ping message", value=ping_text, height=200)
-            st.download_button(
-                "⬇️  Download Community Ping (.txt)",
-                ping_text,
-                file_name=f"esis_community_ping_{structured.case_id}.txt",
-                mime="text/plain",
-            )
-            st.info(
-                "💡 **Where to post:** Nextdoor (neighborhood tab) • Facebook neighborhood groups • "
-                "LinkedIn (with privacy settings) • Reddit r/Denver or r/Colorado • "
-                "Local mutual aid groups on Signal/Telegram • Church/community center bulletin boards"
-            )
+            st.text_area("", value=ping_text, height=180, key="ping_display",
+                         label_visibility="collapsed")
+            dl_col, tip_col = st.columns([1, 3])
+            with dl_col:
+                st.download_button(
+                    "⬇️  Download Ping (.txt)",
+                    ping_text,
+                    file_name=f"esis_ping_{structured.case_id}.txt",
+                    mime="text/plain",
+                )
+            with tip_col:
+                st.markdown(
+                    "<small style='color:#475569'>Post to: Nextdoor · Facebook Groups · LinkedIn · "
+                    "Reddit r/Denver · Signal/Telegram mutual aid · Church boards</small>",
+                    unsafe_allow_html=True,
+                )
 
         st.divider()
 
     # ── SCREEN 3: ACTION PLAN + PACKET ────────────────────────────
-    st.subheader("3  ESIS Action Plan  *(Gemma 4 generated)*")
+    st.markdown('<div class="esis-section-label">Step 3</div>', unsafe_allow_html=True)
+    st.subheader("ESIS Action Plan")
+    st.markdown(
+        "<div style='color:#64748B;font-size:0.8rem;margin-bottom:1rem'>"
+        "Generated by Gemma 4 · Risk-constrained · Explainable</div>",
+        unsafe_allow_html=True,
+    )
 
-    st.markdown(f"**Summary:** {recommendation.summary}")
-    st.markdown("**Top 3 Actions:**")
-    for i, action in enumerate(recommendation.top_actions, 1):
-        st.markdown(f"{i}. {action}")
-    st.markdown(f"**Fallback:** {recommendation.fallback_plan}")
+    # Summary card
+    st.markdown(f"""
+    <div class="esis-card">
+        <div style="color:#64748B;font-size:0.7rem;text-transform:uppercase;
+                    letter-spacing:0.1em;margin-bottom:0.4rem">Situation Summary</div>
+        <div style="color:#E2E8F0;font-size:0.95rem;line-height:1.6">
+            {recommendation.summary}
+        </div>
+    </div>""", unsafe_allow_html=True)
+
+    # Top 3 actions
+    st.markdown("<div style='color:#94A3B8;font-size:0.8rem;margin:0.8rem 0 0.4rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em'>Top 3 Actions</div>", unsafe_allow_html=True)
+    actions_html = "".join(
+        f"<div class='action-item'>"
+        f"<div class='action-num'>{i}</div>"
+        f"<div class='action-text'>{action}</div>"
+        f"</div>"
+        for i, action in enumerate(recommendation.top_actions, 1)
+    )
+    st.markdown(actions_html, unsafe_allow_html=True)
+
+    # Fallback plan
+    st.markdown(f"""
+    <div style='background:#0A1525;border:1px solid #1E3A5F;border-radius:8px;
+                padding:0.7rem 1rem;margin-top:0.8rem;
+                border-left:3px solid #64748B'>
+        <span style='color:#64748B;font-size:0.75rem;text-transform:uppercase;
+                     letter-spacing:0.08em;font-weight:600'>Fallback Plan · </span>
+        <span style='color:#94A3B8;font-size:0.85rem'>{recommendation.fallback_plan}</span>
+    </div>""", unsafe_allow_html=True)
 
     with st.expander("📄  Full Advocacy Packet"):
         st.text_area("One-page summary", value=packet.one_page_summary, height=100)
@@ -608,7 +979,8 @@ if analyze_btn:
     # ── SCREEN 4: LOCATION-AWARE RESOURCE MAP ────────────────────
     if nearby:
         st.divider()
-        st.subheader("4  Nearby Resources Map")
+        st.markdown('<div class="esis-section-label">Step 4</div>', unsafe_allow_html=True)
+        st.subheader("Nearby Resources Map")
         st.caption(
             f"Showing {len(nearby)} resources near your location ({location_source}). "
             "White dot = you. Hover markers for details."
@@ -622,30 +994,26 @@ if analyze_btn:
         render_resource_map(person_lat, person_lng, nearby)
 
         # Emergency contacts panel
-        st.subheader("📞  Emergency Contacts — Act Now")
+        st.markdown('<div class="esis-section-label" style="margin-top:0.5rem">Emergency</div>', unsafe_allow_html=True)
+        st.subheader("Contacts — Act Now")
 
-        emerg_cols = st.columns(3)
         emergency_numbers = [
-            ("🚨 Emergency", "911", "Life-threatening emergency"),
-            ("📞 211 Colorado", "211", "Resource hotline — 24/7"),
-            ("🧠 988 Crisis", "988", "Mental health crisis line"),
-            ("🏠 Warmline", "1-844-493-8255", "Colorado Crisis Services"),
-            ("🆔 ID Recovery", "720-944-3666", "Denver ID Hub"),
-            ("⚖️ Legal Aid", "303-837-1321", "Colorado Legal Services"),
+            ("🚨", "911", "Emergency", "Life-threatening"),
+            ("📞", "211", "Colorado Hotline", "Resources 24/7"),
+            ("🧠", "988", "Crisis Line", "Mental health"),
+            ("🏠", "844-493-8255", "CO Crisis Services", "Warmline/walk-in"),
+            ("🆔", "720-944-3666", "Denver ID Hub", "Document recovery"),
+            ("⚖️", "303-837-1321", "Legal Aid", "Colorado Legal Svc"),
         ]
-        for i, (label, number, desc) in enumerate(emergency_numbers):
+        emerg_cols = st.columns(3)
+        for i, (icon, number, label, desc) in enumerate(emergency_numbers):
             with emerg_cols[i % 3]:
-                st.markdown(
-                    f"""
-                    <div style='background:#0F172A;border:1px solid #1E3A5F;
-                                border-radius:6px;padding:0.75rem;margin-bottom:0.5rem'>
-                        <div style='color:#F8FAFC;font-weight:bold'>{label}</div>
-                        <div style='color:#60A5FA;font-size:1.1rem;font-weight:bold'>{number}</div>
-                        <div style='color:#94A3B8;font-size:0.8rem'>{desc}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                st.markdown(f"""
+                <div class="contact-badge">
+                    <div class="cb-label">{icon} {label}</div>
+                    <div class="cb-number">{number}</div>
+                    <div class="cb-desc">{desc}</div>
+                </div>""", unsafe_allow_html=True)
 
         # Split resources by category for focused display
         physical_resources = [r for r in nearby if r["type"] not in ("transportation", "emergency_lodging", "housing")]
