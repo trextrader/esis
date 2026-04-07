@@ -1087,16 +1087,49 @@ if analyze_btn:
         </div>
     </div>""", unsafe_allow_html=True)
 
-    # Top 3 actions
-    st.markdown("<div style='color:#94A3B8;font-size:0.8rem;margin:0.8rem 0 0.4rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em'>Top 3 Actions</div>", unsafe_allow_html=True)
-    actions_html = "".join(
-        f"<div class='action-item'>"
-        f"<div class='action-num'>{i}</div>"
-        f"<div class='action-text'>{action}</div>"
-        f"</div>"
-        for i, action in enumerate(recommendation.top_actions, 1)
-    )
-    st.markdown(actions_html, unsafe_allow_html=True)
+    # Action plan — horizon-separated when acute, flat list otherwise
+    if recommendation.immediate_actions:
+        def _horizon_block(label: str, color: str, border: str, actions: list) -> str:
+            items = "".join(
+                f"<div class='action-item'>"
+                f"<div class='action-num' style='background:{border}'>{i}</div>"
+                f"<div class='action-text'>{a}</div>"
+                f"</div>"
+                for i, a in enumerate(actions, 1)
+            )
+            return (
+                f"<div style='margin-bottom:0.3rem'>"
+                f"<span style='color:{color};font-size:0.7rem;font-weight:700;"
+                f"text-transform:uppercase;letter-spacing:0.1em'>{label}</span>"
+                f"</div>{items}"
+            )
+
+        st.markdown(_horizon_block(
+            "Horizon 1 — Do This Now (0–2 hours)", "#EF4444", "#EF4444",
+            recommendation.immediate_actions,
+        ), unsafe_allow_html=True)
+
+        if recommendation.stabilization_actions:
+            st.markdown(_horizon_block(
+                "Horizon 2 — Next 24 Hours", "#F59E0B", "#F59E0B",
+                recommendation.stabilization_actions,
+            ), unsafe_allow_html=True)
+
+        if recommendation.recovery_actions:
+            st.markdown(_horizon_block(
+                "Horizon 3 — Recovery Track (Days–Weeks)", "#10B981", "#10B981",
+                recommendation.recovery_actions,
+            ), unsafe_allow_html=True)
+    else:
+        st.markdown("<div style='color:#94A3B8;font-size:0.8rem;margin:0.8rem 0 0.4rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em'>Top 3 Actions</div>", unsafe_allow_html=True)
+        actions_html = "".join(
+            f"<div class='action-item'>"
+            f"<div class='action-num'>{i}</div>"
+            f"<div class='action-text'>{action}</div>"
+            f"</div>"
+            for i, action in enumerate(recommendation.top_actions, 1)
+        )
+        st.markdown(actions_html, unsafe_allow_html=True)
 
     # Fallback plan
     st.markdown(f"""

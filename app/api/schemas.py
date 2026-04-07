@@ -98,6 +98,10 @@ class RecommendationOutput(BaseModel):
     top_actions: List[str] = []
     fallback_plan: str = ""
     what_to_preserve: List[str] = []
+    # Survival-horizon separation — populated when acute conditions are detected
+    immediate_actions: List[str] = []      # Horizon 1: 0–2 hours — survive tonight
+    stabilization_actions: List[str] = []  # Horizon 2: next 24h — restore continuity
+    recovery_actions: List[str] = []       # Horizon 3: days–weeks — housing/benefits
 
 
 class CasePacket(BaseModel):

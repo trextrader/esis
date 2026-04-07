@@ -16,6 +16,16 @@ def _load_templates() -> dict:
         return yaml.safe_load(f)
 
 
+def _is_acute_survival_state(risk: RiskAssessment, case: StructuredCase) -> bool:
+    """True when immediate survival-horizon ordering is mandatory."""
+    return (
+        risk.exposure_risk >= 0.85
+        or (risk.medical_risk >= 0.80 and case.constraints.get("recent_discharge"))
+        or (risk.enforcement_risk >= 0.80 and case.constraints.get("was_displaced"))
+        or (not case.constraints.get("has_shelter") and risk.exposure_risk >= 0.70)
+    )
+
+
 def _build_prompt(case: StructuredCase, risk: RiskAssessment, templates: dict) -> str:
     constraints_text = "\n".join(
         f"- {k}: {v}" for k, v in case.constraints.items() if v
@@ -25,6 +35,7 @@ def _build_prompt(case: StructuredCase, risk: RiskAssessment, templates: dict) -
         medical_risk=f"{risk.medical_risk:.2f}",
         exposure_risk=f"{risk.exposure_risk:.2f}",
         documentation_risk=f"{risk.documentation_risk:.2f}",
+        enforcement_risk=f"{risk.enforcement_risk:.2f}",
         overall_priority=risk.overall_priority,
         requires_escalation=risk.requires_escalation,
         constraints=constraints_text or "None",
@@ -48,9 +59,82 @@ def _parse_response(text: str) -> dict:
 
 def _fallback_output(case: StructuredCase, risk: RiskAssessment) -> RecommendationOutput:
     """Deterministic fallback when Gemma is unavailable."""
+    domains_str = ", ".join(case.risk_domains) if case.risk_domains else "general support"
+    acute = _is_acute_survival_state(risk, case)
+
+    if acute:
+        # ── HORIZON 1: Immediate survival (0–2 hours) ──────────────────
+        h1 = []
+        if risk.enforcement_risk >= 0.8 and case.constraints.get("was_displaced"):
+            h1.append(
+                "Relocate to the nearest indoor safe space immediately — "
+                "current location was compromised by enforcement contact. "
+                "Call 211 or walk to the nearest warming center / ER for safety."
+            )
+        if risk.exposure_risk >= 0.7 or not case.constraints.get("has_shelter"):
+            h1.append(
+                "Request same-night indoor placement now — call 211 and say: "
+                "'I need emergency shelter tonight. I have a disability, recent hospital "
+                "discharge, and cold exposure. I need a non-congregate placement.' "
+                "This triggers a different pathway than a standard shelter request."
+            )
+        if not h1:
+            h1.append("Call 211 immediately for same-night emergency placement")
+
+        # ── HORIZON 2: Medical and continuity (next 24 hours) ──────────
+        h2 = []
+        if risk.medical_risk >= 0.8 or case.constraints.get("recent_discharge"):
+            h2.append(
+                "Treat this as a post-discharge medical continuity failure. "
+                "Return to the ER and demand a social work evaluation — not triage. "
+                "Say: 'I was recently discharged and am now homeless with worsening symptoms. "
+                "I need a social worker to document a discharge-to-street event and reinstate "
+                "my medical respite referral.' This is a documented patient safety failure."
+            )
+        if risk.enforcement_risk >= 0.5:
+            h2.append(
+                "Document the enforcement interaction: date, location, officer descriptions, "
+                "commands given, belongings lost, what was denied. "
+                "This record is evidence for legal aid, case management re-entry, "
+                "and housing pathway restoration."
+            )
+        if not h2:
+            h2.append("Contact a case manager or outreach worker within 24 hours")
+
+        # ── HORIZON 3: Recovery track (days to weeks) ──────────────────
+        h3 = []
+        if risk.documentation_risk >= 0.5:
+            h3.append("Generate ESIS advocacy packet and connect with coordinated entry / Colorado Legal Services (303-837-1321)")
+        h3.append("Begin SOAR (SSI/SSDI) application — retroactive to filing date — once stable")
+
+        top_actions = [h1[0], h2[0], h3[0]]
+
+        return RecommendationOutput(
+            summary=(
+                f"Acute survival state — {domains_str} risk domains active. "
+                f"Immediate indoor placement and medical continuity are the first priority. "
+                f"Benefits and housing applications follow once tonight is safe."
+            ),
+            top_actions=top_actions,
+            immediate_actions=h1[:2],
+            stabilization_actions=h2[:2],
+            recovery_actions=h3[:2],
+            fallback_plan=(
+                "If 211 and shelter are unavailable: go to the nearest ER — you have the right "
+                "to warmth and safety. State your disability and recent discharge. "
+                "Call 988 (crisis line) or Colorado Crisis Services (844-493-8255). "
+                "Next steps once stable: SOAR application, HUD chronic homelessness voucher "
+                "(1-800-569-4287), Colorado Legal Services (303-837-1321)."
+            ),
+            what_to_preserve=[
+                "Medical records and discharge paperwork — evidence for respite reinstatement",
+                "Any documentation of enforcement interaction — date, location, what was said",
+                "Contact information for any caseworker or advocate you have spoken with",
+            ],
+        )
+
+    # ── Non-acute fallback ──────────────────────────────────────────────
     actions = []
-    if risk.enforcement_risk >= 0.8:
-        actions.insert(0, "Relocate immediately to a safer area — current location has been compromised by enforcement contact")
     if risk.medical_risk >= 0.8:
         actions.append("Seek emergency medical evaluation immediately — do not delay")
     if risk.exposure_risk >= 0.7:
@@ -58,11 +142,11 @@ def _fallback_output(case: StructuredCase, risk: RiskAssessment) -> Recommendati
     if risk.documentation_risk >= 0.5:
         actions.append("Generate referral packet and begin ID replacement process")
     if risk.enforcement_risk >= 0.8:
-        actions.append("Document police interaction details — date, location, officer description, what was said — for advocate or case manager")
-    if risk.medical_risk >= 0.5 and "Seek emergency medical evaluation immediately — do not delay" not in actions:
-        actions.append("Contact hospital social worker to document repeated misdiagnosis and request escalation")
+        actions.insert(0, "Relocate immediately — location compromised by enforcement contact")
+        actions.append("Document police interaction details for advocate or case manager")
+    if risk.medical_risk >= 0.5 and not any("medical" in a.lower() for a in actions):
+        actions.append("Contact hospital social worker to document misdiagnosis and request escalation")
 
-    # Always ensure at least 3 actions
     defaults = [
         "Contact 211 for immediate resource referral",
         "Document your current situation in writing",
@@ -73,7 +157,6 @@ def _fallback_output(case: StructuredCase, risk: RiskAssessment) -> Recommendati
             break
         actions.append(d)
 
-    domains_str = ", ".join(case.risk_domains) if case.risk_domains else "general support"
     return RecommendationOutput(
         summary=(
             f"High-priority case with active risk domains: {domains_str}. "
@@ -179,4 +262,18 @@ def _build_profile_context(
         "Do not recommend congregate shelter if cannot_congregate is true. "
         "Lead with the highest-leverage action for their specific situation."
     )
+
+    # Survival-horizon override — injected when acute conditions are present
+    if profile and housing_track:
+        # We don't have risk/case here, but the system prompt already carries the rule.
+        # Add a reminder so it is impossible to miss.
+        lines.append(
+            "\nSURVIVAL HORIZON OVERRIDE: If exposure_risk >= 0.85 or medical_risk >= 0.80 "
+            "with recent_discharge or enforcement_risk >= 0.80 with displacement, then "
+            "top_actions[0] MUST be immediate indoor placement or emergency transport. "
+            "top_actions[1] MUST be medical continuity or enforcement documentation. "
+            "top_actions[2] MUST be advocacy packet / coordinated entry. "
+            "SOAR, SSI, Section 811, and complaint filing belong in fallback_plan ONLY."
+        )
+
     return "\n".join(lines)
