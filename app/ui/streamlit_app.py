@@ -33,6 +33,7 @@ DEMO_CASES = {
     "Exposure / Cold Night Risk": ("demo", "case_cold_night.json"),
     "Administrative Pathway Collapse": ("demo", "case_lost_documents.json"),
     "Multi-Domain Failure": ("demo", "case_mixed_failure.json"),
+    "Enforcement Displacement (Police Interaction)": ("demo", "case_enforcement_displacement.json"),
 }
 
 
@@ -528,6 +529,27 @@ with col_right:
         value=case_data.get("chronic_homeless", False),
         help="HUD priority — direct housing voucher pathway available",
     )
+    st.markdown("**Authority Interaction (if applicable):**")
+    police_contact = st.checkbox(
+        "Recent police interaction",
+        value=case_data.get("has_police_contact", False),
+        help="Any contact with law enforcement — welfare check, displacement, warning, or arrest",
+    )
+    was_displaced = st.checkbox(
+        "Told to leave / displaced",
+        value=case_data.get("was_displaced", False),
+        help="Forced to move from a location by police",
+    )
+    was_threatened = st.checkbox(
+        "Threatened with arrest",
+        value=case_data.get("was_threatened_with_arrest", False),
+        help="Criminalization pressure applied during survival situation",
+    )
+    lost_items = st.checkbox(
+        "Lost belongings during interaction",
+        value=case_data.get("lost_belongings_due_to_interaction", False),
+        help="Survival gear, documents, medication, or phone lost or confiscated",
+    )
 
 # selected_needs is populated inside the profile expander below;
 # initialize here so save panel can reference it before that block renders
@@ -566,9 +588,15 @@ with st.expander("💾  Save this scenario for later", expanded=False):
                 "recent_discharge": recent_discharge,
                 "cannot_congregate": cannot_congregate,
                 "chronic_homeless": chronic_homeless,
-                # Location
-                "saved_zip": zip_input.strip() if zip_input.strip() else "",
-                "saved_gps": gps_input.strip() if gps_input.strip() else "",
+                # Enforcement
+                "has_police_contact": police_contact,
+                "was_displaced": was_displaced,
+                "was_threatened_with_arrest": was_threatened,
+                "lost_belongings_due_to_interaction": lost_items,
+                # Location — read from session_state because zip_input/gps_input
+                # widgets are defined later in the script
+                "saved_zip": st.session_state.get("loc_zip", "").strip(),
+                "saved_gps": st.session_state.get("loc_gps", "").strip(),
                 # Profile fields
                 "is_disabled": st.session_state.get("is_disabled", False),
                 "is_woman_with_minor_children": st.session_state.get("is_wmc", False),
@@ -761,6 +789,10 @@ if analyze_btn:
         recent_discharge=recent_discharge,
         cannot_congregate=cannot_congregate,
         chronic_homeless=chronic_homeless,
+        has_police_contact=police_contact,
+        was_displaced=was_displaced,
+        was_threatened_with_arrest=was_threatened,
+        lost_belongings_due_to_interaction=lost_items,
     )
 
     # Build person profile from profile section
@@ -858,13 +890,15 @@ if analyze_btn:
             </div>
         </div>"""
 
-    r1, r2, r3 = st.columns(3)
+    r1, r2, r3, r4 = st.columns(4)
     with r1:
         st.markdown(_risk_card("Medical Risk", risk.medical_risk, "🩺"), unsafe_allow_html=True)
     with r2:
         st.markdown(_risk_card("Exposure Risk", risk.exposure_risk, "🌡️"), unsafe_allow_html=True)
     with r3:
         st.markdown(_risk_card("Documentation Risk", risk.documentation_risk, "📋"), unsafe_allow_html=True)
+    with r4:
+        st.markdown(_risk_card("Enforcement Risk", risk.enforcement_risk, "🚔"), unsafe_allow_html=True)
 
     st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 

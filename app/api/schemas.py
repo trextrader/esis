@@ -19,6 +19,11 @@ class CaseInput(BaseModel):
     recent_discharge: bool = False
     cannot_congregate: bool = False
     chronic_homeless: bool = False
+    # Enforcement interaction flags
+    has_police_contact: bool = False
+    was_displaced: bool = False
+    was_threatened_with_arrest: bool = False
+    lost_belongings_due_to_interaction: bool = False
 
 
 class PersonProfile(BaseModel):
@@ -69,17 +74,18 @@ class RiskAssessment(BaseModel):
     medical_risk: float = 0.0
     exposure_risk: float = 0.0
     documentation_risk: float = 0.0
+    enforcement_risk: float = 0.0
     overall_priority: str = "low"
     requires_escalation: bool = False
 
-    @field_validator("medical_risk", "exposure_risk", "documentation_risk", mode="before")
+    @field_validator("medical_risk", "exposure_risk", "documentation_risk", "enforcement_risk", mode="before")
     @classmethod
     def clamp(cls, v: float) -> float:
         return max(0.0, min(1.0, float(v)))
 
     @model_validator(mode="after")
     def compute_priority(self) -> RiskAssessment:
-        max_risk = max(self.medical_risk, self.exposure_risk, self.documentation_risk)
+        max_risk = max(self.medical_risk, self.exposure_risk, self.documentation_risk, self.enforcement_risk)
         priority = "high" if max_risk >= 0.8 else "medium" if max_risk >= 0.5 else "low"
         # Use object.__setattr__ to avoid triggering recursive validation
         object.__setattr__(self, "overall_priority", priority)

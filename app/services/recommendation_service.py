@@ -49,12 +49,16 @@ def _parse_response(text: str) -> dict:
 def _fallback_output(case: StructuredCase, risk: RiskAssessment) -> RecommendationOutput:
     """Deterministic fallback when Gemma is unavailable."""
     actions = []
+    if risk.enforcement_risk >= 0.8:
+        actions.insert(0, "Relocate immediately to a safer area — current location has been compromised by enforcement contact")
     if risk.medical_risk >= 0.8:
         actions.append("Seek emergency medical evaluation immediately — do not delay")
     if risk.exposure_risk >= 0.7:
         actions.append("Find indoor shelter or warming center now")
     if risk.documentation_risk >= 0.5:
         actions.append("Generate referral packet and begin ID replacement process")
+    if risk.enforcement_risk >= 0.8:
+        actions.append("Document police interaction details — date, location, officer description, what was said — for advocate or case manager")
     if risk.medical_risk >= 0.5 and "Seek emergency medical evaluation immediately — do not delay" not in actions:
         actions.append("Contact hospital social worker to document repeated misdiagnosis and request escalation")
 

@@ -5,6 +5,7 @@ from app.api.schemas import CaseInput, StructuredCase
 MEDICAL_KEYWORDS = ["pain", "infection", "hospital", "discharged", "medication", "injury", "fever", "wound"]
 EXPOSURE_KEYWORDS = ["freezing", "cold", "heat", "outside", "weather", "exposure", "night"]
 DOCUMENT_KEYWORDS = ["lost", "id", "documents", "paperwork", "referral", "caseworker", "records"]
+ENFORCEMENT_KEYWORDS = ["police", "cop", "officer", "arrested", "displaced", "trespass", "warrant", "dispersed"]
 
 
 def normalize_case(inp: CaseInput) -> StructuredCase:
@@ -19,6 +20,8 @@ def normalize_case(inp: CaseInput) -> StructuredCase:
         domains.append("exposure")
     if inp.has_lost_documents:
         domains.append("documents")
+    if inp.has_police_contact or inp.was_displaced or inp.was_threatened_with_arrest:
+        domains.append("enforcement")
 
     # Supplement from free text (only add if not already present)
     if any(k in text for k in MEDICAL_KEYWORDS) and "medical" not in domains:
@@ -27,6 +30,8 @@ def normalize_case(inp: CaseInput) -> StructuredCase:
         domains.append("exposure")
     if any(k in text for k in DOCUMENT_KEYWORDS) and "documents" not in domains:
         domains.append("documents")
+    if any(k in text for k in ENFORCEMENT_KEYWORDS) and "enforcement" not in domains:
+        domains.append("enforcement")
 
     # Extract symptom keywords from text
     symptom_words = ["pain", "infection", "fever", "wound", "bleeding"]
@@ -38,6 +43,10 @@ def normalize_case(inp: CaseInput) -> StructuredCase:
         "no_transport": inp.no_transport,
         "has_shelter": inp.has_shelter,
         "recent_discharge": inp.recent_discharge,  # Required for triage scoring
+        "has_police_contact": inp.has_police_contact,
+        "was_displaced": inp.was_displaced,
+        "was_threatened_with_arrest": inp.was_threatened_with_arrest,
+        "lost_belongings_due_to_interaction": inp.lost_belongings_due_to_interaction,
     }
 
     resources = {

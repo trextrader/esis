@@ -17,11 +17,21 @@ def generate_audit(
         triggered_flags.append(f"Exposure risk threshold exceeded ({risk.exposure_risk:.2f} >= 0.70)")
     if risk.documentation_risk >= 0.5:
         triggered_flags.append(f"Documentation failure risk elevated ({risk.documentation_risk:.2f} >= 0.50)")
+    if risk.enforcement_risk >= 0.5:
+        triggered_flags.append(f"Enforcement-driven harm risk elevated ({risk.enforcement_risk:.2f} >= 0.50)")
     if risk.requires_escalation:
         triggered_flags.append("Escalation required — at least one risk dimension >= 0.80")
 
+    # Enforcement-specific flags
+    if case.constraints.get("was_displaced"):
+        triggered_flags.append("Enforcement-driven displacement event detected")
+    if case.constraints.get("was_threatened_with_arrest"):
+        triggered_flags.append("Criminalization pressure detected during survival state")
+    if case.constraints.get("lost_belongings_due_to_interaction"):
+        triggered_flags.append("Loss of survival-critical resources due to enforcement interaction")
+
     active_constraints = [k for k, v in case.constraints.items() if v]
-    suppressed = [d for d in ["medical", "exposure", "documents"] if d not in case.risk_domains]
+    suppressed = [d for d in ["medical", "exposure", "documents", "enforcement"] if d not in case.risk_domains]
     primary = primary_pathway or (case.risk_domains[0] if case.risk_domains else "general")
 
     return {
@@ -32,6 +42,7 @@ def generate_audit(
             "medical": round(risk.medical_risk, 3),
             "exposure": round(risk.exposure_risk, 3),
             "documentation": round(risk.documentation_risk, 3),
+            "enforcement": round(risk.enforcement_risk, 3),
         },
         "pathway_selected": primary,
         "why_this_route": (

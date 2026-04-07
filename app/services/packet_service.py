@@ -13,7 +13,15 @@ def generate_packet(
     domains_str = ", ".join(case.risk_domains) if case.risk_domains else "general"
     first_action = recommendation.top_actions[0] if recommendation.top_actions else "immediate triage"
 
+    enforcement_note = ""
+    if risk.enforcement_risk >= 0.5:
+        enforcement_note = (
+            "⚠️ Enforcement interaction contributed to current instability. "
+            "Displacement or criminalization risk observed. "
+        )
+
     summary = (
+        f"{enforcement_note}"
         f"[{priority_label} PRIORITY] Individual presenting with {domains_str} risk. "
         f"Medical risk: {risk.medical_risk:.0%}. "
         f"Exposure risk: {risk.exposure_risk:.0%}. "

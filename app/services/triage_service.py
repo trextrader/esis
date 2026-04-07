@@ -7,10 +7,12 @@ def score_risk(case: StructuredCase) -> RiskAssessment:
     medical = _score_medical(case)
     exposure = _score_exposure(case)
     documents = _score_documents(case)
+    enforcement = _score_enforcement(case)
     return RiskAssessment(
         medical_risk=medical,
         exposure_risk=exposure,
         documentation_risk=documents,
+        enforcement_risk=enforcement,
     )
 
 
@@ -51,6 +53,21 @@ def _score_documents(case: StructuredCase) -> float:
         score += 0.5
     if case.constraints.get("referral_broken"):
         score += 0.3
+    if not case.constraints.get("has_shelter"):
+        score += 0.1
+    return min(score, 1.0)
+
+
+def _score_enforcement(case: StructuredCase) -> float:
+    score = 0.0
+    if "enforcement" in case.risk_domains:
+        score += 0.4
+    if case.constraints.get("was_displaced"):
+        score += 0.25
+    if case.constraints.get("was_threatened_with_arrest"):
+        score += 0.2
+    if case.constraints.get("lost_belongings_due_to_interaction"):
+        score += 0.2
     if not case.constraints.get("has_shelter"):
         score += 0.1
     return min(score, 1.0)

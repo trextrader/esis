@@ -1,0 +1,19 @@
+{
+  "raw_text": "Two police officers approached me and two others outside a shopping plaza in freezing cold weather around 10 PM. One person with us was in serious distress and could barely stand. The officers asked if we had drugs and told us we had 10 minutes to leave or we would be arrested for trespassing. They did not ask if we were okay, did not offer shelter or warmth, and gave no resource referrals. I had to pack the other person's belongings and move them to safety before I could get myself to safety. No shelter tonight, temperature dropping below freezing, no transportation, and no phone service.",
+  "has_pain": false,
+  "has_exposure_risk": true,
+  "has_shelter": false,
+  "has_lost_documents": false,
+  "low_battery": true,
+  "low_funds": true,
+  "no_transport": true,
+  "recent_discharge": false,
+  "cannot_congregate": false,
+  "chronic_homeless": true,
+  "has_police_contact": true,
+  "was_displaced": true,
+  "was_threatened_with_arrest": true,
+  "lost_belongings_due_to_interaction": false,
+  "saved_zip": "80233",
+  "saved_gps": ""
+}

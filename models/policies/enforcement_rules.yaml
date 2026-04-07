@@ -1,0 +1,97 @@
+# models/policies/enforcement_rules.yaml
+# ESIS — Enforcement Interaction Policy Layer
+#
+# Police/law-enforcement contact is modeled as a state-transition event
+# that can escalate or reduce survival risk depending on the interaction type.
+# This file defines the policy rules ESIS uses to score, flag, and respond
+# to enforcement-driven harm events.
+
+interaction_types:
+  welfare_first:
+    description: Officer leads with a welfare check before any enforcement action
+    risk_effect: negative          # reduces harm
+    example_prompt:
+      - "Are you safe right now?"
+      - "Do you need food, water, blankets, or medical help?"
+      - "Do you have a place to stay tonight?"
+      - "Can I connect you with a shelter or outreach worker?"
+
+  neutral:
+    description: Officer takes no action — neither assists nor displaces
+    risk_effect: none
+
+  enforcement_first:
+    description: Officer leads with compliance demands, displacement, or criminalization
+    risk_effect: positive          # increases harm
+    escalation_note: >
+      Enforcement-first engagement during acute vulnerability can function as a
+      forced displacement event, increasing exposure risk, pathway disruption,
+      and near-term mortality probability.
+
+risk_escalation_conditions:
+  - condition: was_displaced AND has_exposure_risk
+    result: exposure_risk escalated — person forced into unsafe environment
+  - condition: lost_belongings_due_to_interaction
+    result: document_risk + exposure_risk escalated — survival resources destroyed
+  - condition: was_threatened_with_arrest AND no_shelter
+    result: criminalization_risk high — survival behavior being penalized
+
+enforcement_harm_model:
+  formula: "ΔH = w1·ΔR_exposure + w2·ΔR_medical + w3·ΔR_pathway + w4·ΔR_criminalization"
+  weights:
+    w1_exposure: 1.0
+    w2_medical: 1.0
+    w3_pathway: 1.0
+    w4_criminalization: 1.0
+  note: >
+    Positive ΔH means enforcement drove harm. Negative ΔH means enforcement
+    reduced harm. The system models both directions — a welfare-first officer
+    is part of the solution and is scored accordingly.
+
+recommended_response:
+  welfare_first_protocol:
+    first_words:
+      - "Are you going to be okay?"
+      - "Do you need anything right now — food, water, blankets, clothing, a sleeping bag, medical help, a phone charge, transport, or resource assistance?"
+    rationale: >
+      This single question surfaces immediate survival deficits in seconds and
+      opens a welfare pathway. It is not sentiment — it is operational triage.
+
+  if_enforcement_first:
+    - Log the interaction immediately in ESIS
+    - Preserve timeline: timestamp, location, officer description if known
+    - Prioritize relocation to the nearest safe environment
+    - Escalate outreach support — person may have lost trust in institutions
+    - Generate advocacy packet for case manager with enforcement event flagged
+
+  if_displaced:
+    - Immediately re-score exposure and medical risk
+    - Surface nearest shelter or warming center with transport options
+    - Flag lost belongings for document recovery pathway
+
+documentation_fields:
+  - timestamp
+  - location
+  - agency
+  - officer_count
+  - interaction_type
+  - officer_response_profile
+  - condition_at_encounter
+  - displacement_order_issued
+  - resources_offered
+  - belongings_lost
+  - documents_lost
+  - treatment_interrupted
+  - referral_broken
+  - outcome_state
+
+transparency_policy: >
+  Every logged enforcement interaction is shared with case managers, outreach
+  programs, HUD, and medical staff. The log is exportable as structured JSON
+  for use by legal advocates or in police oversight complaints.
+  No interaction is invisible to the system.
+
+closing_principle: >
+  A homelessness response system that cannot detect and document
+  enforcement-driven harm is incomplete. ESIS is designed to make every
+  interaction visible — whether it saved a life or put one at greater risk.
