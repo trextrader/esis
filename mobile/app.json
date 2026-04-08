@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "ESIS",
+    "slug": "esis-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/esis_logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#060D18"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#060D18"
+      },
+      "package": "com.esis.survival",
+      "permissions": []
+    },
+    "plugins": [
+      [
+        "@react-native-async-storage/async-storage",
+        { "AsyncStorage_db_size_in_MB": 10 }
+      ]
+    ]
+  }
+}

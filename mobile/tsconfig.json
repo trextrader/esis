@@ -1,0 +1,11 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@engine/*": ["./src/engine/*"],
+      "@storage/*": ["./src/storage/*"],
+      "@screens/*": ["./src/screens/*"]
+    }
+  }
+}
