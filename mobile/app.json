@@ -18,11 +18,11 @@
       "package": "com.esis.survival",
       "permissions": []
     },
-    "plugins": [
-      [
-        "@react-native-async-storage/async-storage",
-        { "AsyncStorage_db_size_in_MB": 10 }
-      ]
-    ]
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "e0ddc0b3-1193-4692-bf16-8d1af4904f38"
+      }
+    }
   }
 }
