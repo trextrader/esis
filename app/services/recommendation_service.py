@@ -196,7 +196,7 @@ def generate_recommendation(
             client = InferenceClient(token=hf_token)
             # Use chat_completion so the system prompt is passed correctly to -it models
             response = client.chat_completion(
-                model="google/gemma-3-27b-it",  # Update to gemma-4 model ID when available
+                model="google/gemma-4-27b-it",
                 messages=[
                     {"role": "system", "content": templates["system_prompt"]},
                     {"role": "user", "content": prompt},

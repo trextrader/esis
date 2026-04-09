@@ -7,7 +7,7 @@ import { colors, spacing } from '../theme';
 import { RecommendationOutput } from '../engine/types';
 import { RootStackParamList } from '../../App';
 
-type Nav   = StackNavigationProp<RootStackParamList, 'ActionPlan'>;
+type Nav   = StackNavigationProp<RootStackParamList>;
 type Route = RouteProp<RootStackParamList, 'ActionPlan'>;
 
 function HorizonBlock({
@@ -93,6 +93,21 @@ export default function ActionPlanScreen() {
         </View>
       )}
 
+      <View style={styles.outputGrid}>
+        <TouchableOpacity
+          style={styles.outputBtn}
+          onPress={() => nav.navigate('Packet', { caseId })}
+        >
+          <Text style={styles.outputBtnText}>📋 Advocacy Packet</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.outputBtn}
+          onPress={() => nav.navigate('HousingTrack', { caseId })}
+        >
+          <Text style={styles.outputBtnText}>🏠 Housing Track</Text>
+        </TouchableOpacity>
+      </View>
+
       <TouchableOpacity style={styles.pingBtn} onPress={() => nav.navigate('Ping', { caseId })}>
         <Text style={styles.pingBtnText}>📢  Send Community Ping</Text>
       </TouchableOpacity>
@@ -128,6 +143,10 @@ const styles = StyleSheet.create({
   preserveLabel:  { color: colors.textMuted, fontSize: 10, textTransform: 'uppercase',
                     letterSpacing: 0.8, marginBottom: 6 },
   preserveItem:   { color: colors.textSecondary, fontSize: 13, lineHeight: 22 },
+  outputGrid:     { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm },
+  outputBtn:      { flex: 1, backgroundColor: colors.card, borderRadius: 10, padding: spacing.md,
+                    alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+  outputBtnText:  { color: colors.textPrimary, fontSize: 14, fontWeight: '600' },
   pingBtn:        { backgroundColor: colors.blue, borderRadius: 10, padding: spacing.md + 4,
                     alignItems: 'center', marginBottom: spacing.sm },
   pingBtnText:    { color: '#fff', fontWeight: '700', fontSize: 16 },

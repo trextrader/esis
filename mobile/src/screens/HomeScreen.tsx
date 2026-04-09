@@ -11,7 +11,7 @@ import { loadAllCases, deleteCase } from '../storage/cases';
 import { SavedCase } from '../engine/types';
 import { RootStackParamList } from '../../App';
 
-type Nav = StackNavigationProp<RootStackParamList, 'Home'>;
+type Nav = StackNavigationProp<RootStackParamList>;
 
 export default function HomeScreen() {
   const nav = useNavigation<Nav>();
@@ -78,6 +78,9 @@ export default function HomeScreen() {
         />
       )}
 
+      <TouchableOpacity onPress={() => nav.navigate('Settings')} style={styles.settingsLink}>
+        <Text style={styles.settingsLinkText}>Settings / Update Gemma Token</Text>
+      </TouchableOpacity>
       <Text style={styles.footer}>Long-press a case to delete · Tap to open</Text>
     </View>
   );
@@ -100,5 +103,7 @@ const styles = StyleSheet.create({
   badge:       { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 2, marginLeft: 8 },
   badgeText:   { fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
   caseDate:    { color: colors.textMuted, fontSize: 11, marginTop: 4 },
-  footer:      { color: colors.textMuted, fontSize: 11, textAlign: 'center', marginTop: spacing.sm },
+  settingsLink:     { alignItems: 'center', paddingVertical: spacing.sm },
+  settingsLinkText: { color: colors.textMuted, fontSize: 11 },
+  footer:      { color: colors.textMuted, fontSize: 11, textAlign: 'center', marginTop: spacing.xs },
 });

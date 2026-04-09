@@ -62,6 +62,28 @@ export interface RecommendationOutput {
   immediateActions: string[];
   stabilizationActions: string[];
   recoveryActions: string[];
+  usedGemma?: boolean;
+}
+
+export interface HousingTrack {
+  trackId: string;
+  trackName: string;
+  priorityScore: number;
+  rationale: string[];
+  immediateActions: string[];
+  targetPrograms: string[];
+  estimatedTimeline: string;
+  communityPingMessage: string;
+}
+
+export interface CasePacket {
+  caseId: string;
+  createdAt: string;
+  onePageSummary: string;
+  advocateScript: string;
+  referralHandoff: string;
+  actionTimeline: string[];
+  preservationChecklist: string[];
 }
 
 export interface LEInteraction {
@@ -86,24 +108,40 @@ export interface LEInteraction {
 
 export interface PersonProfile {
   isDisabled: boolean;
+  isWomanWithMinorChildren: boolean;
+  hasLifeThreateningCondition: boolean;
+  hasEmployment: boolean;
+  isKnownSubstanceUser: boolean;
+  isElderly: boolean;
   monthsHomeless: number;
   educationLevel: string;
   professionalBackground: string;
   skillsSummary: string;
   resourceNeeds: string[];
+  consentCommunityPing: boolean;
   contactEmail: string;
   contactPhone: string;
+  contactApps: string[];
+  disabilityApplicationStarted: boolean;
 }
 
 export const DEFAULT_PROFILE: PersonProfile = {
   isDisabled: false,
+  isWomanWithMinorChildren: false,
+  hasLifeThreateningCondition: false,
+  hasEmployment: false,
+  isKnownSubstanceUser: false,
+  isElderly: false,
   monthsHomeless: 0,
   educationLevel: '',
   professionalBackground: '',
   skillsSummary: '',
   resourceNeeds: [],
+  consentCommunityPing: false,
   contactEmail: '',
   contactPhone: '',
+  contactApps: [],
+  disabilityApplicationStarted: false,
 };
 
 export interface SavedCase {
@@ -114,5 +152,7 @@ export interface SavedCase {
   profile: PersonProfile;
   risk?: RiskAssessment;
   recommendation?: RecommendationOutput;
+  housingTrack?: HousingTrack;
+  packet?: CasePacket;
   leInteractions: LEInteraction[];
 }

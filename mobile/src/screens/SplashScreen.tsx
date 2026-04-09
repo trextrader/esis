@@ -4,6 +4,7 @@ import { View, Image, Text, StyleSheet, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { colors } from '../theme';
+import { loadSettings } from '../storage/settings';
 import { RootStackParamList } from '../../App';
 
 type Nav = StackNavigationProp<RootStackParamList, 'Splash'>;
@@ -17,7 +18,14 @@ export default function SplashScreen() {
       Animated.timing(opacity, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.delay(1200),
       Animated.timing(opacity, { toValue: 0, duration: 400, useNativeDriver: true }),
-    ]).start(() => nav.replace('Home'));
+    ]).start(async () => {
+      const settings = await loadSettings();
+      if (!settings.hfToken) {
+        nav.replace('TokenSetup');
+      } else {
+        nav.replace('Home');
+      }
+    });
   }, []);
 
   return (
