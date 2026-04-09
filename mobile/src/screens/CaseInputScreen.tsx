@@ -14,8 +14,9 @@ import { assignHousingTrack } from '../engine/housing_track';
 import { generatePacket } from '../engine/packet';
 import { loadAllCases, saveCase, newCaseId } from '../storage/cases';
 import { loadSettings } from '../storage/settings';
+import { searchLocalServices, formatForPrompt } from '../services/search211';
 import { CaseInput, DEFAULT_CASE_INPUT, PersonProfile, DEFAULT_PROFILE, SavedCase } from '../engine/types';
-import { CITIES } from '../data/cities';
+import { CITIES, getCityById } from '../data/cities';
 import { RootStackParamList } from '../../App';
 
 type Nav   = StackNavigationProp<RootStackParamList, 'CaseInput'>;
@@ -48,6 +49,7 @@ export default function CaseInputScreen() {
   const [profile, setProfile]           = useState<PersonProfile>(DEFAULT_PROFILE);
   const [savedCaseData, setSavedCaseData] = useState<SavedCase | null>(null);
   const [analyzing, setAnalyzing]       = useState(false);
+  const [analyzeStep, setAnalyzeStep]   = useState('');
 
   useEffect(() => {
     if (caseId) {
@@ -78,17 +80,30 @@ export default function CaseInputScreen() {
     setAnalyzing(true);
     try {
       const settings = await loadSettings();
+
+      setAnalyzeStep('Scoring risk...');
       const structured   = normalizeCase(inp);
       const risk         = scoreRisk(structured);
       const housingTrack = assignHousingTrack(profile, inp.city);
 
+      // Live service search — runs in parallel with housing track, non-blocking
+      setAnalyzeStep('Searching live local services...');
+      const city = getCityById(inp.city);
+      const liveServices = await searchLocalServices(
+        city.name, city.state, structured.riskDomains, settings.serperApiKey,
+      );
+      const liveServicesBlock = formatForPrompt(liveServices);
+
+      setAnalyzeStep('Gemma 4 generating plan...');
       let recommendation;
       try {
         recommendation = await generateGemmaRecommendation(
-          structured, risk, settings.hfToken, settings.gemmaModel, inp.city, profile, housingTrack,
+          structured, risk, settings.hfToken, settings.gemmaModel,
+          inp.city, liveServicesBlock, profile, housingTrack,
         );
       } catch (err) {
         setAnalyzing(false);
+        setAnalyzeStep('');
         if (err instanceof GemmaError) {
           Alert.alert('Gemma 4 Error', err.message, [
             { text: 'Go to Settings', onPress: () => nav.navigate('Settings') },
@@ -116,9 +131,11 @@ export default function CaseInputScreen() {
         leInteractions: savedCaseData?.leInteractions ?? [],
       };
       await saveCase(toSave);
+      setAnalyzeStep('');
       nav.navigate('Risk', { caseId: id, risk });
     } finally {
       setAnalyzing(false);
+      setAnalyzeStep('');
     }
   };
 
@@ -260,7 +277,7 @@ export default function CaseInputScreen() {
           ? (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <ActivityIndicator color="#fff" style={{ marginRight: 10 }} />
-              <Text style={styles.analyzeBtnText}>Gemma 4 Analyzing...</Text>
+              <Text style={styles.analyzeBtnText}>{analyzeStep || 'Analyzing...'}</Text>
             </View>
           )
           : <Text style={styles.analyzeBtnText}>Analyze with ESIS + Gemma 4</Text>

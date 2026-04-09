@@ -7,12 +7,14 @@ export interface AppSettings {
   hfToken: string;
   gemmaModel: string;
   tokenSetupComplete: boolean;
+  serperApiKey: string;
 }
 
 const DEFAULTS: AppSettings = {
   hfToken: '',
   gemmaModel: 'google/gemma-4-27b-it',
   tokenSetupComplete: false,
+  serperApiKey: '',
 };
 
 export async function loadSettings(): Promise<AppSettings> {

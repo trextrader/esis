@@ -8,7 +8,7 @@ import { colors, spacing } from '../theme';
 import { loadSettings, saveSettings, AppSettings } from '../storage/settings';
 
 export default function SettingsScreen() {
-  const [settings, setSettings] = useState<AppSettings>({ hfToken: '', gemmaModel: 'google/gemma-4-27b-it', tokenSetupComplete: true });
+  const [settings, setSettings] = useState<AppSettings>({ hfToken: '', gemmaModel: 'google/gemma-4-27b-it', tokenSetupComplete: true, serperApiKey: '' });
   const [visible, setVisible]   = useState(false);
   const [saving,  setSaving]    = useState(false);
 
@@ -71,6 +71,23 @@ export default function SettingsScreen() {
         autoCorrect={false}
       />
       <Text style={styles.hint}>Default: google/gemma-4-27b-it. Change only if using a different model.</Text>
+
+      <Text style={styles.sectionTitle}>Serper API Key (Live Service Search)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Paste Serper API key (free at serper.dev)"
+        placeholderTextColor={colors.textMuted}
+        value={settings.serperApiKey}
+        onChangeText={v => setSettings(s => ({ ...s, serperApiKey: v }))}
+        autoCapitalize="none"
+        autoCorrect={false}
+        secureTextEntry
+      />
+      <Text style={styles.hint}>
+        Optional. When set, ESIS searches 211.org, findhelp.org, and local city directories
+        in real-time before asking Gemma — so plans reference current, verified services.
+        Free tier at serper.dev: 2,500 searches/month.
+      </Text>
 
       <View style={styles.privacyCard}>
         <Text style={styles.privacyText}>

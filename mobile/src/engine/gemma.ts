@@ -38,6 +38,7 @@ function buildPrompt(
   c: StructuredCase,
   risk: RiskAssessment,
   cityId: string,
+  liveServicesBlock: string,
   profile?: PersonProfile,
   housingTrack?: HousingTrack,
 ): string {
@@ -52,6 +53,7 @@ function buildPrompt(
     `CITY CRISIS LINE: ${city.crisis.name} — ${city.crisis.phone}\n` +
     `CITY LEGAL AID: ${city.legalAid.name} — ${city.legalAid.phone}\n` +
     `COORDINATED ENTRY: ${city.coordinatedEntry.name} — ${city.coordinatedEntry.phone}\n\n` +
+    (liveServicesBlock ? `${liveServicesBlock}\n\n` : '') +
     `CASE SUMMARY:\n${c.notes.slice(0, 400)}\n\n` +
     `RISK ASSESSMENT:\n` +
     `- Medical risk: ${risk.medicalRisk.toFixed(2)}\n` +
@@ -134,10 +136,11 @@ export async function generateGemmaRecommendation(
   hfToken: string,
   model: string,
   cityId: string = DEFAULT_CITY_ID,
+  liveServicesBlock: string = '',
   profile?: PersonProfile,
   housingTrack?: HousingTrack,
 ): Promise<RecommendationOutput> {
-  const prompt = buildPrompt(c, risk, cityId, profile, housingTrack);
+  const prompt = buildPrompt(c, risk, cityId, liveServicesBlock, profile, housingTrack);
 
   let resp: Response;
   try {
