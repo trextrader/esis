@@ -48,6 +48,14 @@ export default function ActionPlanScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <TouchableOpacity
+        style={styles.codeBlueBtn}
+        onPress={() => nav.navigate('CodeBlue', { caseId })}
+      >
+        <Text style={styles.codeBlueBtnText}>CODE BLUE</Text>
+        <Text style={styles.codeBlueBtnSub}>Immediate full-distress emergency broadcast</Text>
+      </TouchableOpacity>
+
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>Situation Summary</Text>
         <Text style={styles.summaryText}>{rec.summary}</Text>
@@ -108,8 +116,12 @@ export default function ActionPlanScreen() {
         </TouchableOpacity>
       </View>
 
+      <TouchableOpacity style={styles.sosBtn} onPress={() => nav.navigate('SOS', { caseId })}>
+        <Text style={styles.sosBtnText}>🆘  Real-Time SOS Ping</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.pingBtn} onPress={() => nav.navigate('Ping', { caseId })}>
-        <Text style={styles.pingBtnText}>📢  Send Community Ping</Text>
+        <Text style={styles.pingBtnText}>📢  Community Ping (Social Media)</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -147,9 +159,19 @@ const styles = StyleSheet.create({
   outputBtn:      { flex: 1, backgroundColor: colors.card, borderRadius: 10, padding: spacing.md,
                     alignItems: 'center', borderWidth: 1, borderColor: colors.border },
   outputBtnText:  { color: colors.textPrimary, fontSize: 14, fontWeight: '600' },
-  pingBtn:        { backgroundColor: colors.blue, borderRadius: 10, padding: spacing.md + 4,
+  codeBlueBtn:    { backgroundColor: '#1565C0', borderRadius: 14,
+                    padding: spacing.md + 6, alignItems: 'center',
+                    marginBottom: spacing.md,
+                    borderWidth: 2, borderColor: '#42A5F5',
+                    shadowColor: '#1565C0', shadowRadius: 16, shadowOpacity: 0.6, elevation: 10 },
+  codeBlueBtnText:{ color: '#fff', fontWeight: '900', fontSize: 22, letterSpacing: 2 },
+  codeBlueBtnSub: { color: '#90CAF9', fontSize: 11, marginTop: 2, letterSpacing: 0.5 },
+  sosBtn:         { backgroundColor: colors.red, borderRadius: 10, padding: spacing.md + 4,
                     alignItems: 'center', marginBottom: spacing.sm },
-  pingBtnText:    { color: '#fff', fontWeight: '700', fontSize: 16 },
+  sosBtnText:     { color: '#fff', fontWeight: '800', fontSize: 16, letterSpacing: 0.3 },
+  pingBtn:        { backgroundColor: colors.blue, borderRadius: 10, padding: spacing.md + 2,
+                    alignItems: 'center', marginBottom: spacing.sm },
+  pingBtnText:    { color: '#fff', fontWeight: '700', fontSize: 15 },
   secondaryBtn:   { borderWidth: 1, borderColor: colors.border, borderRadius: 10,
                     padding: spacing.md, alignItems: 'center', marginBottom: spacing.sm },
   secondaryBtnText: { color: colors.textSecondary, fontSize: 14 },
