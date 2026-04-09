@@ -15,6 +15,7 @@ import { generatePacket } from '../engine/packet';
 import { loadAllCases, saveCase, newCaseId } from '../storage/cases';
 import { loadSettings } from '../storage/settings';
 import { CaseInput, DEFAULT_CASE_INPUT, PersonProfile, DEFAULT_PROFILE, SavedCase } from '../engine/types';
+import { CITIES } from '../data/cities';
 import { RootStackParamList } from '../../App';
 
 type Nav   = StackNavigationProp<RootStackParamList, 'CaseInput'>;
@@ -79,12 +80,12 @@ export default function CaseInputScreen() {
       const settings = await loadSettings();
       const structured   = normalizeCase(inp);
       const risk         = scoreRisk(structured);
-      const housingTrack = assignHousingTrack(profile);
+      const housingTrack = assignHousingTrack(profile, inp.city);
 
       let recommendation;
       try {
         recommendation = await generateGemmaRecommendation(
-          structured, risk, settings.hfToken, settings.gemmaModel, profile, housingTrack,
+          structured, risk, settings.hfToken, settings.gemmaModel, inp.city, profile, housingTrack,
         );
       } catch (err) {
         setAnalyzing(false);
@@ -134,6 +135,28 @@ export default function CaseInputScreen() {
         value={caseName}
         onChangeText={setCaseName}
       />
+
+      {section('City')}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cityScroll}
+        contentContainerStyle={styles.cityScrollContent}>
+        {CITIES.map(city => {
+          const selected = inp.city === city.id;
+          return (
+            <TouchableOpacity
+              key={city.id}
+              style={[styles.cityChip, selected && styles.cityChipSelected]}
+              onPress={() => setInp(p => ({ ...p, city: city.id }))}
+            >
+              <Text style={[styles.cityChipText, selected && styles.cityChipTextSelected]}>
+                {city.name}
+              </Text>
+              <Text style={[styles.cityChipState, selected && styles.cityChipTextSelected]}>
+                {city.state}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
 
       {section('Situation Description')}
       <TextInput
@@ -291,6 +314,15 @@ const styles = StyleSheet.create({
   secondaryBtn:      { borderWidth: 1, borderColor: colors.border, borderRadius: 10,
                        padding: spacing.md, alignItems: 'center', marginTop: spacing.sm },
   secondaryBtnText:  { color: colors.textSecondary, fontSize: 14 },
+  cityScroll:            { marginBottom: spacing.sm },
+  cityScrollContent:     { paddingVertical: spacing.xs },
+  cityChip:              { borderWidth: 1, borderColor: colors.border, borderRadius: 20,
+                           paddingHorizontal: 14, paddingVertical: 7, marginRight: spacing.xs,
+                           backgroundColor: colors.card, alignItems: 'center' },
+  cityChipSelected:      { backgroundColor: colors.blue, borderColor: colors.blue },
+  cityChipText:          { color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
+  cityChipState:         { color: colors.textMuted, fontSize: 10 },
+  cityChipTextSelected:  { color: '#fff' },
   settingsBtn:       { padding: spacing.md, alignItems: 'center', marginTop: spacing.sm },
   settingsBtnText:   { color: colors.textMuted, fontSize: 12 },
 });

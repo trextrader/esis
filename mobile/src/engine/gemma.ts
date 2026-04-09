@@ -1,5 +1,6 @@
 // mobile/src/engine/gemma.ts
 import { StructuredCase, RiskAssessment, RecommendationOutput, PersonProfile, HousingTrack } from './types';
+import { getCityById, DEFAULT_CITY_ID } from '../data/cities';
 
 const HF_CHAT_URL = 'https://api-inference.huggingface.co/v1/chat/completions';
 
@@ -36,15 +37,21 @@ who may be outside, cold, in pain, and has been displaced by police tonight.`;
 function buildPrompt(
   c: StructuredCase,
   risk: RiskAssessment,
+  cityId: string,
   profile?: PersonProfile,
   housingTrack?: HousingTrack,
 ): string {
+  const city = getCityById(cityId);
   const constraintsText = Object.entries(c.constraints)
     .filter(([, v]) => v)
     .map(([k, v]) => `- ${k}: ${v}`)
     .join('\n') || 'None';
 
   let prompt =
+    `LOCATION: ${city.name}, ${city.state}\n` +
+    `CITY CRISIS LINE: ${city.crisis.name} — ${city.crisis.phone}\n` +
+    `CITY LEGAL AID: ${city.legalAid.name} — ${city.legalAid.phone}\n` +
+    `COORDINATED ENTRY: ${city.coordinatedEntry.name} — ${city.coordinatedEntry.phone}\n\n` +
     `CASE SUMMARY:\n${c.notes.slice(0, 400)}\n\n` +
     `RISK ASSESSMENT:\n` +
     `- Medical risk: ${risk.medicalRisk.toFixed(2)}\n` +
@@ -126,10 +133,11 @@ export async function generateGemmaRecommendation(
   risk: RiskAssessment,
   hfToken: string,
   model: string,
+  cityId: string = DEFAULT_CITY_ID,
   profile?: PersonProfile,
   housingTrack?: HousingTrack,
 ): Promise<RecommendationOutput> {
-  const prompt = buildPrompt(c, risk, profile, housingTrack);
+  const prompt = buildPrompt(c, risk, cityId, profile, housingTrack);
 
   let resp: Response;
   try {

@@ -33,6 +33,7 @@ export function normalizeCase(inp: CaseInput): StructuredCase {
     riskDomains: [...new Set(domains)],
     symptoms,
     constraints: {
+      city:                             inp.city,
       lowBattery:                       inp.lowBattery,
       lowFunds:                         inp.lowFunds,
       noTransport:                      inp.noTransport,

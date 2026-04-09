@@ -2,6 +2,7 @@
 
 export interface CaseInput {
   rawText: string;
+  city: string;
   hasPain: boolean;
   hasExposureRisk: boolean;
   hasShelter: boolean;
@@ -20,6 +21,7 @@ export interface CaseInput {
 
 export const DEFAULT_CASE_INPUT: CaseInput = {
   rawText: '',
+  city: 'denver',
   hasPain: false,
   hasExposureRisk: false,
   hasShelter: false,

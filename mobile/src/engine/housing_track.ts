@@ -1,6 +1,7 @@
 // mobile/src/engine/housing_track.ts
-// TypeScript port of app/services/housing_track_service.py
+// TypeScript port of app/services/housing_track_service.py — multi-city aware
 import { PersonProfile, HousingTrack } from './types';
+import { getCityById, getCityTrack, DEFAULT_CITY_ID } from '../data/cities';
 
 const TRACKS: Record<string, {
   name: string;
@@ -176,7 +177,7 @@ const EDU_LABELS: Record<string, string> = {
   professional: 'Professional degree (JD, MD, etc.)',
 };
 
-export function assignHousingTrack(profile: PersonProfile): HousingTrack {
+export function assignHousingTrack(profile: PersonProfile, cityId: string = DEFAULT_CITY_ID): HousingTrack {
   let score = 0;
   const rationale: string[] = [];
   let selectedTrack = 'general';
@@ -244,9 +245,12 @@ export function assignHousingTrack(profile: PersonProfile): HousingTrack {
   score = Math.min(score, 100);
 
   const tdef = TRACKS[selectedTrack];
+  const cityTrack = getCityTrack(cityId, selectedTrack);
+  const city = getCityById(cityId);
+
   let communityPingMessage = '';
   if (profile.consentCommunityPing) {
-    communityPingMessage = generateCommunityPing(profile, selectedTrack);
+    communityPingMessage = generateCommunityPing(profile, selectedTrack, city.name);
   }
 
   return {
@@ -254,14 +258,14 @@ export function assignHousingTrack(profile: PersonProfile): HousingTrack {
     trackName: tdef.name,
     priorityScore: score,
     rationale,
-    immediateActions: tdef.actions,
-    targetPrograms: tdef.programs,
+    immediateActions: cityTrack.actions,
+    targetPrograms: cityTrack.programs,
     estimatedTimeline: tdef.timeline,
     communityPingMessage,
   };
 }
 
-function generateCommunityPing(profile: PersonProfile, trackId: string): string {
+function generateCommunityPing(profile: PersonProfile, trackId: string, cityName: string): string {
   const parts: string[] = [];
 
   if (profile.monthsHomeless >= 12) {
@@ -300,8 +304,8 @@ function generateCommunityPing(profile: PersonProfile, trackId: string): string 
   const contactStr = contactParts.length ? contactParts.join(' | ') : 'Contact via ESIS referral';
 
   return (
-    `ESIS COMMUNITY PING — Neighbor Needs Help\n\n` +
-    `A ${profileStr} is located in your neighborhood and is asking for community support.\n\n` +
+    `ESIS COMMUNITY PING — ${cityName} Neighbor Needs Help\n\n` +
+    `A ${profileStr} is located in your neighborhood (${cityName}) and is asking for community support.\n\n` +
     `They need: ${needsStr}\n\n` +
     `About them: Non-drug user, capable, has been failed by the current system — ` +
     `not a danger to anyone. They deserve stability and a path back.\n\n` +
