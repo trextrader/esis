@@ -21,6 +21,7 @@ from app.services.location_service import zip_to_coords, priority_resources_for_
 from app.services.housing_track_service import (
     assign_housing_track, get_resource_programs, EDU_LABELS, RESOURCE_PROGRAMS
 )
+from app.services.pdf_service import generate_pdf
 
 CASES_DIR = REPO_ROOT / "data" / "demo_cases"
 SAVED_DIR = REPO_ROOT / "data" / "saved_cases"
@@ -1339,6 +1340,30 @@ if analyze_btn:
 
     with st.expander("🔍  Audit Trail — Why this plan was selected"):
         st.json(audit)
+
+    st.divider()
+    pdf_bytes = generate_pdf(
+        structured=structured,
+        risk=risk,
+        housing_track=housing_track,
+        recommendation=recommendation,
+        packet=packet,
+        audit=audit,
+        nearby=nearby,
+    )
+    if pdf_bytes:
+        st.download_button(
+            label="⬇️  Download Full Report as PDF",
+            data=pdf_bytes,
+            file_name=f"esis_report_{structured.case_id}.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
+    else:
+        st.warning(
+            "PDF generation unavailable — WeasyPrint system dependencies missing. "
+            "This works on HuggingFace Spaces."
+        )
 
     st.caption(
         "ESIS — Edge Survival Intelligence System | Gemma 4 Good Hackathon 2026 | "
