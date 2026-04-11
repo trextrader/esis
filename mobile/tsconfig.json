@@ -2,10 +2,12 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "types": ["jest"],
     "paths": {
       "@engine/*": ["./src/engine/*"],
       "@storage/*": ["./src/storage/*"],
       "@screens/*": ["./src/screens/*"]
     }
-  }
+  },
+  "exclude": ["**/tests/**", "**/__tests__/**"]
 }

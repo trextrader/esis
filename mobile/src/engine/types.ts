@@ -43,7 +43,7 @@ export interface StructuredCase {
   timestamp: string;
   riskDomains: string[];
   symptoms: string[];
-  constraints: Record<string, boolean | number>;
+  constraints: Record<string, string | boolean | number>;
   notes: string;
 }
 
