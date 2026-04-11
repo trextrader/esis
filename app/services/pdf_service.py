@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
+from html import escape as _esc
 from pathlib import Path
 from typing import Optional
 
@@ -12,6 +14,7 @@ from app.api.schemas import (
 )
 
 _LOGO_PATH = Path(__file__).parent.parent / "ui" / "assets" / "esis_logo.png"
+_log = logging.getLogger(__name__)
 
 
 def _logo_base64() -> str:
@@ -51,7 +54,7 @@ def _list_items(items: list[str], bullet: str = "▸") -> str:
     if not items:
         return "<p style='color:#9ca3af;font-size:12px;'>None</p>"
     return "".join(
-        f"<p style='margin:4px 0;font-size:13px;color:#e5e7eb;'>{bullet} {item}</p>"
+        f"<p style='margin:4px 0;font-size:13px;color:#e5e7eb;'>{bullet} {_esc(item)}</p>"
         for item in items
     )
 
@@ -83,7 +86,7 @@ def _build_html(
         if logo_b64 else ""
     )
 
-    city = structured.constraints.get("city", "unknown").title()
+    city = _esc(structured.constraints.get("city", "unknown").title())
     escalation_html = ""
     if risk.requires_escalation:
         escalation_html = """
@@ -102,8 +105,8 @@ def _build_html(
       <h1 style="color:#e94560;font-size:22px;font-weight:900;
                  letter-spacing:0.1em;margin:0;">ESIS REPORT</h1>
       <p style="color:#9ca3af;font-size:12px;margin:6px 0 0 0;">
-        Case ID: <strong style="color:#e5e7eb;">{structured.case_id}</strong>
-        &nbsp;·&nbsp; {structured.timestamp[:19].replace("T", " ")}
+        Case ID: <strong style="color:#e5e7eb;">{_esc(structured.case_id)}</strong>
+        &nbsp;·&nbsp; {_esc(structured.timestamp[:19].replace("T", " "))}
         &nbsp;·&nbsp; {city}
       </p>
     </div>
@@ -117,19 +120,19 @@ def _build_html(
         _risk_bar("Enforcement Risk", risk.enforcement_risk, "&#x1F694;") +
         f"<p style='color:#9ca3af;font-size:12px;margin-top:8px;'>"
         f"Overall priority: <strong style='color:#e5e7eb;'>"
-        f"{risk.overall_priority.upper()}</strong></p>"
+        f"{_esc(risk.overall_priority.upper())}</strong></p>"
     )
 
     # Section 3 — Housing Track
     track_content = f"""
     <p style="color:#e5e7eb;font-size:14px;font-weight:700;margin:0 0 4px 0;">
-      {housing_track.track_name}
+      {_esc(housing_track.track_name)}
       <span style="color:#9ca3af;font-size:12px;font-weight:400;">
         &nbsp;(Priority score: {housing_track.priority_score}/100)
       </span>
     </p>
     <p style="color:#9ca3af;font-size:12px;margin:0 0 8px 0;">
-      {housing_track.estimated_timeline}
+      {_esc(housing_track.estimated_timeline)}
     </p>
     <p style="color:#d1d5db;font-size:12px;font-weight:600;margin:8px 0 4px 0;">Rationale:</p>
     {_list_items(housing_track.rationale)}
@@ -140,7 +143,7 @@ def _build_html(
 
     # Section 4 — Action Plan
     plan_content = f"""
-    <p style="color:#e5e7eb;font-size:13px;margin:0 0 12px 0;">{recommendation.summary}</p>
+    <p style="color:#e5e7eb;font-size:13px;margin:0 0 12px 0;">{_esc(recommendation.summary)}</p>
     <p style="color:#d1d5db;font-size:12px;font-weight:600;margin:0 0 4px 0;">
       Horizon 1 — Do This Now (0–2 hours):
     </p>
@@ -158,17 +161,17 @@ def _build_html(
     </p>
     <p style="color:#e5e7eb;font-size:13px;background:#1f2937;
               padding:8px 12px;border-radius:4px;margin:0;">
-      {recommendation.fallback_plan}
+      {_esc(recommendation.fallback_plan)}
     </p>"""
 
     # Section 5 — Nearby Resources
     if nearby:
         resource_rows = "".join(
             f"<p style='margin:4px 0;font-size:12px;color:#e5e7eb;'>"
-            f"&#x25B8; <strong>{r.get('name','')}</strong> &nbsp;&#xB7;&nbsp; "
-            f"&#x1F4DE; {r.get('phone','')} &nbsp;&#xB7;&nbsp; "
-            f"&#x1F4CD; {r.get('distance_mi', '?')} mi &nbsp;&#xB7;&nbsp; "
-            f"{r.get('hours','')}</p>"
+            f"&#x25B8; <strong>{_esc(r.get('name',''))}</strong> &nbsp;&#xB7;&nbsp; "
+            f"&#x1F4DE; {_esc(r.get('phone',''))} &nbsp;&#xB7;&nbsp; "
+            f"&#x1F4CD; {_esc(str(r.get('distance_mi', '?')))} mi &nbsp;&#xB7;&nbsp; "
+            f"{_esc(r.get('hours',''))}</p>"
             for r in nearby[:12]
         )
         resources_section = _section("Nearby Resources", resource_rows)
@@ -181,11 +184,11 @@ def _build_html(
     # Section 6 — Advocacy Packet
     packet_content = f"""
     <p style="color:#d1d5db;font-size:12px;font-weight:600;margin:0 0 4px 0;">One-Page Summary:</p>
-    <p style="color:#e5e7eb;font-size:13px;margin:0 0 12px 0;">{packet.one_page_summary}</p>
+    <p style="color:#e5e7eb;font-size:13px;margin:0 0 12px 0;">{_esc(packet.one_page_summary)}</p>
     <p style="color:#d1d5db;font-size:12px;font-weight:600;margin:0 0 4px 0;">Advocate Script:</p>
-    <p style="color:#e5e7eb;font-size:13px;margin:0 0 12px 0;">{packet.advocate_script}</p>
+    <p style="color:#e5e7eb;font-size:13px;margin:0 0 12px 0;">{_esc(packet.advocate_script)}</p>
     <p style="color:#d1d5db;font-size:12px;font-weight:600;margin:0 0 4px 0;">Referral Handoff:</p>
-    <p style="color:#e5e7eb;font-size:13px;margin:0 0 12px 0;">{packet.referral_handoff}</p>
+    <p style="color:#e5e7eb;font-size:13px;margin:0 0 12px 0;">{_esc(packet.referral_handoff)}</p>
     <p style="color:#d1d5db;font-size:12px;font-weight:600;margin:0 0 4px 0;">Action Timeline:</p>
     {_list_items(packet.action_timeline)}
     <p style="color:#d1d5db;font-size:12px;font-weight:600;margin:10px 0 4px 0;">
@@ -198,7 +201,7 @@ def _build_html(
     audit_content = f"""
     <pre style="background:#111827;color:#86efac;font-size:10px;
                 padding:10px;border-radius:4px;white-space:pre-wrap;
-                word-break:break-word;">{audit_json}</pre>"""
+                word-break:break-word;">{_esc(audit_json)}</pre>"""
 
     return f"""<!DOCTYPE html>
 <html>
@@ -264,5 +267,6 @@ def generate_pdf(
     try:
         html = _build_html(structured, risk, housing_track, recommendation, packet, audit, nearby)
         return _html_to_pdf(html)
-    except Exception:
+    except Exception as exc:
+        _log.warning("PDF generation failed: %s", exc, exc_info=True)
         return None
