@@ -119,11 +119,16 @@ def test_generate_pdf_with_nearby_resources():
     )
     assert isinstance(pdf, bytes)
     assert len(pdf) > 1000
+    assert b"Stout Street" in pdf  # verifies nearby resources are rendered
 
 
 def test_generate_pdf_returns_none_on_weasyprint_failure(monkeypatch):
     import app.services.pdf_service as svc
-    monkeypatch.setattr(svc, "_html_to_pdf", lambda html: (_ for _ in ()).throw(Exception("weasyprint failed")))
+
+    def _fail(html):
+        raise Exception("weasyprint failed")
+
+    monkeypatch.setattr(svc, "_html_to_pdf", _fail)
     result = generate_pdf(
         structured=_make_structured(),
         risk=_make_risk(),
