@@ -1341,8 +1341,7 @@ if analyze_btn:
     with st.expander("🔍  Audit Trail — Why this plan was selected"):
         st.json(audit)
 
-    st.divider()
-    pdf_bytes = generate_pdf(
+    st.session_state["pdf_bytes"] = generate_pdf(
         structured=structured,
         risk=risk,
         housing_track=housing_track,
@@ -1351,11 +1350,17 @@ if analyze_btn:
         audit=audit,
         nearby=nearby,
     )
-    if pdf_bytes:
+    st.session_state["pdf_case_id"] = structured.case_id
+
+# PDF download button — rendered outside if analyze_btn so it survives reruns
+# (st.download_button triggers a rerun; session_state keeps the bytes available)
+if "pdf_bytes" in st.session_state:
+    st.divider()
+    if st.session_state["pdf_bytes"]:
         st.download_button(
             label="⬇️  Download Full Report as PDF",
-            data=pdf_bytes,
-            file_name=f"esis_report_{structured.case_id}.pdf",
+            data=st.session_state["pdf_bytes"],
+            file_name=f"esis_report_{st.session_state['pdf_case_id']}.pdf",
             mime="application/pdf",
             use_container_width=True,
         )
@@ -1365,7 +1370,7 @@ if analyze_btn:
             "This works on HuggingFace Spaces."
         )
 
-    st.caption(
-        "ESIS — Edge Survival Intelligence System | Gemma 4 Good Hackathon 2026 | "
-        "Built with lived experience."
-    )
+st.caption(
+    "ESIS — Edge Survival Intelligence System | Gemma 4 Good Hackathon 2026 | "
+    "Built with lived experience."
+)
