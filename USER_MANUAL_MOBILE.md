@@ -19,7 +19,7 @@
 
 ### 1. Open the Kaggle notebook
 
-*(Kaggle notebook URL — added after publication)*
+https://www.kaggle.com/code/zapperman/esis-gemma4-mobile-app-demo
 
 ### 2. Run All
 

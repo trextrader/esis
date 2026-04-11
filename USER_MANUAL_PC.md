@@ -16,7 +16,7 @@
 
 > No installation required. Runs entirely in the browser.
 
-1. Open the live demo: *(HuggingFace Spaces URL — added after deployment)*
+1. Open the live demo: https://huggingface.co/spaces/trextrader/esis-demo
 2. In the left sidebar, locate the **HF_TOKEN** field
 3. Paste your HuggingFace token (`hf_...`)
 4. The app loads with **Gemma 4 · Live inference** shown in the status bar
