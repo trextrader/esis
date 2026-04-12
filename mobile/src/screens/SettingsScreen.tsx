@@ -25,19 +25,21 @@ export default function SettingsScreen() {
       return;
     }
     setSaving(true);
+    let verified = false;
     try {
+      // Fine-grained tokens with inference-only scope may return 401 here —
+      // save regardless and warn if unverified.
       const resp = await fetch('https://huggingface.co/api/whoami', {
         headers: { Authorization: `Bearer ${t}` },
       });
-      if (resp.status === 401) {
-        Alert.alert('Token rejected', 'HuggingFace did not accept this token.');
-        setSaving(false);
-        return;
-      }
+      verified = resp.ok;
     } catch { /* network error — save anyway */ }
     await saveSettings({ ...settings, hfToken: t });
     setSaving(false);
-    Alert.alert('Saved', 'Settings updated.');
+    Alert.alert(
+      'Saved',
+      verified ? 'Token verified and saved.' : 'Settings saved. If Gemma 4 plans are unavailable, verify your token at huggingface.co/settings/tokens.',
+    );
   };
 
   return (

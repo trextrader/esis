@@ -33,23 +33,30 @@ export default function TokenSetupScreen() {
     }
 
     setLoading(true);
+    let verified = false;
     try {
-      // Quick validation: attempt a low-cost call to verify the token is accepted
+      // Attempt validation — fine-grained tokens with inference-only scope may return 401
+      // here even when valid, so we save regardless and warn if unverified.
       const resp = await fetch('https://huggingface.co/api/whoami', {
         headers: { Authorization: `Bearer ${t}` },
       });
-      if (resp.status === 401) {
-        Alert.alert('Token rejected', 'HuggingFace did not accept this token. Check it and try again.');
-        setLoading(false);
-        return;
-      }
+      verified = resp.ok;
     } catch {
-      // Network error — save anyway and let the user proceed
+      // Network error — skip validation
     }
 
     await saveSettings({ hfToken: t, tokenSetupComplete: true });
     setLoading(false);
-    nav.replace('Home');
+
+    if (!verified) {
+      Alert.alert(
+        'Token saved',
+        'Token saved. If Gemma 4 plans are unavailable, check your token at huggingface.co/settings/tokens.',
+        [{ text: 'Continue', onPress: () => nav.replace('Home') }],
+      );
+    } else {
+      nav.replace('Home');
+    }
   };
 
   return (
