@@ -22,6 +22,7 @@ from app.services.housing_track_service import (
     assign_housing_track, get_resource_programs, EDU_LABELS, RESOURCE_PROGRAMS
 )
 from app.services.pdf_service import generate_pdf
+from app.services.hud_packet_service import generate_hud_packet_pdf
 
 CASES_DIR = REPO_ROOT / "data" / "demo_cases"
 SAVED_DIR = REPO_ROOT / "data" / "saved_cases"
@@ -1281,14 +1282,22 @@ if analyze_btn:
                     "This is protected under the ADA and HUD guidelines."
                 )
 
-            if chronic_homeless:
+            if chronic_homeless or profile.months_homeless >= 12:
                 st.warning(
                     "📋  **Chronic Homelessness Priority** — "
                     "You qualify for HUD's priority permanent housing track. "
                     "You do NOT need a local agency to apply — call HUD directly: "
-                    "**1-800-569-4287** or visit hud.gov. "
-                    "ESIS can generate your chronic homelessness documentation packet."
+                    "**1-800-569-4287** or visit hud.gov."
                 )
+                if "hud_pdf_bytes" in st.session_state and st.session_state["hud_pdf_bytes"]:
+                    st.download_button(
+                        label="⬇️  Download HUD Documentation Packet (PDF)",
+                        data=st.session_state["hud_pdf_bytes"],
+                        file_name=f"hud_chronic_homeless_packet_{structured.case_id}.pdf",
+                        mime="application/pdf",
+                        use_container_width=True,
+                        key="hud_dl",
+                    )
 
             lodging_all = lodging_resources if lodging_resources else []
             if not lodging_all:
@@ -1351,6 +1360,16 @@ if analyze_btn:
         nearby=nearby,
     )
     st.session_state["pdf_case_id"] = structured.case_id
+
+    # HUD packet — generated whenever chronic homeless flag is set
+    if chronic_homeless or profile.months_homeless >= 12:
+        st.session_state["hud_pdf_bytes"] = generate_hud_packet_pdf(
+            profile=profile,
+            housing_track=housing_track,
+            structured=structured,
+        )
+    else:
+        st.session_state.pop("hud_pdf_bytes", None)
 
 # PDF download button — rendered outside if analyze_btn so it survives reruns
 # (st.download_button triggers a rerun; session_state keeps the bytes available)
