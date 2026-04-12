@@ -2,6 +2,8 @@ from __future__ import annotations
 # app/services/routing_service.py
 from app.api.schemas import StructuredCase, RiskAssessment
 
+# Canonical domain names — single source of truth across all services
+STATE_NAMES = ["Medical", "Exposure", "Documentation", "Enforcement"]
 
 ROUTING_MAP = {
     "medical": {
@@ -18,6 +20,16 @@ ROUTING_MAP = {
         "first_contact": "211 — request intake advocate",
         "secondary": "Local DMV for ID fee waiver",
         "tertiary": "Coordinated entry access point",
+    },
+    "enforcement": {
+        "first_contact": "Street outreach team or civil rights legal aid organization",
+        "secondary": "Coordinated entry access point with enforcement-aware advocate",
+        "tertiary": "211 — request enforcement-aware intake specialist",
+    },
+    "multi-domain escalation": {
+        "first_contact": "Mobile crisis team — multi-domain active, immediate escalation required",
+        "secondary": "Civil rights advocate and housing counselor simultaneous outreach",
+        "tertiary": "211 — state multi-domain crisis, request senior case manager",
     },
     "general": {
         "first_contact": "211",
@@ -38,13 +50,21 @@ def select_pathway(case: StructuredCase, risk: RiskAssessment) -> dict:
 
 
 def _pick_primary(risk: RiskAssessment) -> str:
-    # Zero-risk guard — prevents medical being selected when all scores are 0
-    if risk.medical_risk == 0.0 and risk.exposure_risk == 0.0 and risk.documentation_risk == 0.0:
+    scores = {
+        "medical": risk.medical_risk,
+        "exposure": risk.exposure_risk,
+        "documents": risk.documentation_risk,
+        "enforcement": risk.enforcement_risk,
+    }
+
+    # Zero-risk guard
+    if all(v == 0.0 for v in scores.values()):
         return "general"
-    if risk.medical_risk >= risk.exposure_risk and risk.medical_risk >= risk.documentation_risk:
-        return "medical"
-    if risk.exposure_risk >= risk.documentation_risk:
-        return "exposure"
-    if risk.documentation_risk > 0.3:
-        return "documents"
-    return "general"
+
+    # Multi-domain escalation: 2+ domains at or above 0.8
+    high_domains = [k for k, v in scores.items() if v >= 0.8]
+    if len(high_domains) >= 2:
+        return "multi-domain escalation"
+
+    # Single highest domain
+    return max(scores, key=lambda k: scores[k])

@@ -5,6 +5,9 @@ from typing import Optional, List, Dict
 import uuid
 from datetime import datetime
 
+# Canonical domain names — single source of truth across all services and visuals
+STATE_NAMES = ["Medical", "Exposure", "Documentation", "Enforcement"]
+
 
 class CaseInput(BaseModel):
     raw_text: str = ""

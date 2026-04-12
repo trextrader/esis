@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Rectangle, Circle
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Rectangle, Circle, Polygon
 import matplotlib.patheffects as pe
 import textwrap
 import numpy as np
+from pathlib import Path
 
 # -------------------------------------------------
 # COLORS
@@ -16,6 +17,7 @@ GRID = "#334155"
 BLUE_FILL, BLUE_EDGE = "#102B4C", "#60A5FA"
 GOLD_FILL, GOLD_EDGE = "#4A3410", "#FBBF24"
 TEAL_FILL, TEAL_EDGE = "#0E2E36", "#2DD4BF"
+RED_FILL,  RED_EDGE  = "#2D0A0A", "#F87171"
 
 # -------------------------------------------------
 # TEXT FIT HELPERS
@@ -42,7 +44,7 @@ def auto_font_size(text, base=9.2):
         return base - 1.0
 
 # -------------------------------------------------
-# ICONS  (unchanged)
+# ICONS
 # -------------------------------------------------
 def draw_medical_icon(ax, cx, cy, s=0.022, c="#60A5FA"):
     ax.add_patch(Circle((cx, cy), s * 1.25, fill=False, edgecolor=c, linewidth=1.5))
@@ -65,9 +67,22 @@ def draw_id_icon(ax, cx, cy, s=0.040, c="#60A5FA"):
     ax.plot([cx - w*0.02, cx + w*0.28], [cy + h*0.14, cy + h*0.14], color=c, lw=1.0)
     ax.plot([cx - w*0.02, cx + w*0.28], [cy - h*0.02, cy - h*0.02], color=c, lw=1.0)
 
+def draw_badge_icon(ax, cx, cy, s=0.038, c="#F87171"):
+    """Shield/badge icon for enforcement domain."""
+    shield = np.array([
+        [cx - s,   cy + s * 0.9],
+        [cx + s,   cy + s * 0.9],
+        [cx + s,   cy - s * 0.15],
+        [cx,       cy - s * 1.1],
+        [cx - s,   cy - s * 0.15],
+    ])
+    ax.add_patch(Polygon(shield, closed=True, fill=False, edgecolor=c, linewidth=1.5))
+    # Exclamation mark
+    ax.plot([cx, cx], [cy - s * 0.05, cy + s * 0.52], color=c, lw=1.6)
+    ax.add_patch(Circle((cx, cy - s * 0.22), s * 0.09, color=c))
+
 # -------------------------------------------------
-# DRAW A SINGLE LANDSCAPE BOX
-# Text column starts after the icon strip on the left
+# DRAW A SINGLE LANDSCAPE BOX (v2 — icon strip + separator)
 # -------------------------------------------------
 def rounded_box(ax, xy, w, h, fc, ec, title, bullets, icon):
     x, y = xy
@@ -85,10 +100,10 @@ def rounded_box(ax, xy, w, h, fc, ec, title, bullets, icon):
     ])
     ax.add_patch(box)
 
-    # ── ICON: left strip, vertically centred ──────────────────
-    icon_strip_w = 0.10          # width reserved for icon on left
-    ix = x + icon_strip_w * 0.5  # icon centred in the strip
-    iy = y + h * 0.55            # a bit above vertical centre
+    # icon strip (left side)
+    icon_strip_w = 0.10
+    ix = x + icon_strip_w * 0.5
+    iy = y + h * 0.55
 
     if icon == "medical":
         draw_medical_icon(ax, ix, iy, c=ec)
@@ -96,17 +111,19 @@ def rounded_box(ax, xy, w, h, fc, ec, title, bullets, icon):
         draw_snow_icon(ax, ix, iy, c=ec)
     elif icon == "id":
         draw_id_icon(ax, ix, iy, c=ec)
+    elif icon == "badge":
+        draw_badge_icon(ax, ix, iy, c=ec)
 
-    # thin vertical separator line between icon strip and text
+    # thin vertical separator
     sep_x = x + icon_strip_w
     ax.plot([sep_x, sep_x], [y + 0.015, y + h - 0.015],
             color=ec, lw=0.8, alpha=0.35)
 
-    # ── TEXT: starts right of the icon strip ─────────────────
-    text_x = x + icon_strip_w + 0.025   # left edge of text column
-    text_w = w - icon_strip_w - 0.030   # usable text width
+    # text starts right of icon strip
+    text_x = x + icon_strip_w + 0.025
+    text_w = w - icon_strip_w - 0.030
 
-    # title — top of box
+    # title
     ax.text(
         text_x,
         y + h - 0.038,
@@ -123,8 +140,8 @@ def rounded_box(ax, xy, w, h, fc, ec, title, bullets, icon):
     ax.plot([text_x, x + w - 0.018], [rule_y, rule_y],
             color=ec, lw=0.6, alpha=0.4)
 
-    # bullet text — below rule
-    chars_per_line = max(20, int(text_w * 95))   # approximate char width scaling
+    # bullet text
+    chars_per_line = max(20, int(text_w * 95))
     text = wrap_and_fit(bullets, max_width=chars_per_line, max_lines=7, max_bullets=3)
     fs = auto_font_size(text, base=9.2)
 
@@ -174,8 +191,8 @@ def panel(ax, title, subtitle, l_title, l_bullets, m_title, m_bullets, r_title, 
     )
     ax.add_patch(outer)
 
-    ax.text(0.05, 0.935, title,   color=FG,  fontsize=13.5, fontweight="bold", ha="left", va="top")
-    ax.text(0.05, 0.875, subtitle, color=SUB, fontsize=10,   ha="left", va="top")
+    ax.text(0.05, 0.935, title,    color=FG,  fontsize=13.5, fontweight="bold", ha="left", va="top")
+    ax.text(0.05, 0.875, subtitle, color=SUB, fontsize=9.5,  ha="left", va="top")
 
     box_x = 0.07
     box_w = 0.86
@@ -189,21 +206,24 @@ def panel(ax, title, subtitle, l_title, l_bullets, m_title, m_bullets, r_title, 
     rounded_box(ax, (box_x, y2), box_w, box_h, GOLD_FILL, GOLD_EDGE, m_title, m_bullets, icon)
     rounded_box(ax, (box_x, y3), box_w, box_h, TEAL_FILL, TEAL_EDGE, r_title, r_bullets, icon)
 
-    # vertical arrows between boxes
-    arrow(ax, (0.50, y1),         (0.50, y2 + box_h))
-    arrow(ax, (0.50, y2),         (0.50, y3 + box_h))
+    arrow(ax, (0.50, y1),       (0.50, y2 + box_h))
+    arrow(ax, (0.50, y2),       (0.50, y3 + box_h))
 
 # -------------------------------------------------
-# MAIN
+# MAIN — 4-domain 2×2 layout
 # -------------------------------------------------
-def build_scenario_panel(output_path="/mnt/user-data/outputs/esis_scenario_panel_v2.png"):
-    fig, axes = plt.subplots(1, 3, figsize=(18.5, 8.4), dpi=200)
+def build_scenario_panel(output_path=None):
+    if output_path is None:
+        output_path = Path(__file__).parent.parent.parent / "docs" / "figures" / "esis_scenario_panel_v2.png"
+
+    fig, axes = plt.subplots(2, 2, figsize=(18.5, 16.0), dpi=200)
     fig.patch.set_facecolor(BG)
 
+    # --- Panel 1: Medical (top-left) ---
     panel(
-        axes[0],
+        axes[0][0],
         "Post-Discharge Instability",
-        "Failure Mode: discharge without recovery support",
+        "Risk Domain: medical_risk  |  Failure Mode: discharge without recovery support",
         "Input State",
         [
             "Severe pain or declining condition",
@@ -225,10 +245,11 @@ def build_scenario_panel(output_path="/mnt/user-data/outputs/esis_scenario_panel
         "medical"
     )
 
+    # --- Panel 2: Exposure (top-right) ---
     panel(
-        axes[1],
+        axes[0][1],
         "Exposure-Driven Survival Risk",
-        "Failure Mode: environmental survivability collapse",
+        "Risk Domain: exposure_risk  |  Failure Mode: environmental survivability collapse",
         "Input State",
         [
             "Freezing night or heat exposure",
@@ -250,10 +271,11 @@ def build_scenario_panel(output_path="/mnt/user-data/outputs/esis_scenario_panel
         "snow"
     )
 
+    # --- Panel 3: Documentation (bottom-left) ---
     panel(
-        axes[2],
+        axes[1][0],
         "Administrative Pathway Collapse",
-        "Failure Mode: document and referral breakdown",
+        "Risk Domain: documentation_risk  |  Failure Mode: document and referral breakdown",
         "Input State",
         [
             "Lost ID or disrupted paperwork",
@@ -275,21 +297,48 @@ def build_scenario_panel(output_path="/mnt/user-data/outputs/esis_scenario_panel
         "id"
     )
 
+    # --- Panel 4: Enforcement (bottom-right) ---
+    panel(
+        axes[1][1],
+        "Enforcement-Driven Displacement",
+        "Risk Domain: enforcement_risk  |  Failure Mode: criminalization and forced dispersal",
+        "Input State",
+        [
+            "Police sweep or directed displacement event",
+            "Lost belongings or documents during enforcement interaction",
+            "Threat of arrest during survival state"
+        ],
+        "ESIS Reasoning",
+        [
+            "Flag enforcement risk above escalation threshold",
+            "Cross-reference displacement with housing track criteria",
+            "Activate rights-protective advocacy protocol"
+        ],
+        "Action Path",
+        [
+            "Document enforcement interaction for legal referral",
+            "Generate civil rights-aware advocacy packet",
+            "Escalate to coordinated entry with enforcement context"
+        ],
+        "badge"
+    )
+
     fig.suptitle(
-        "Real-World ESIS Intervention Scenarios",
+        "Real-World ESIS Intervention Scenarios — 4-Domain Risk Model",
         color=FG,
         fontsize=22,
         fontweight="bold",
-        y=0.98
+        y=0.995
     )
 
     fig.text(
-        0.5, 0.02,
-        "Representative failure modes showing how ESIS converts fragmented, high-risk conditions into structured intervention pathways.",
+        0.5, 0.003,
+        "Four risk domains: medical_risk · exposure_risk · documentation_risk · enforcement_risk  "
+        "— each domain maps to a dedicated intervention pathway.",
         ha="center", color=MUTED, fontsize=11
     )
 
-    plt.tight_layout(rect=[0.02, 0.05, 0.98, 0.94])
+    plt.tight_layout(rect=[0.01, 0.02, 0.99, 0.97])
     plt.savefig(output_path, bbox_inches="tight", facecolor=BG, dpi=200)
     plt.close()
     print(f"Saved → {output_path}")
