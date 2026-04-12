@@ -10,6 +10,7 @@ import TcpSocket from 'react-native-tcp-socket';
 export interface Helper {
   id: string;
   name: string;
+  message?: string;  // "I'm on my way to [location]"
   lat: number | null;
   lng: number | null;
   respondedAt: string;
@@ -24,6 +25,7 @@ export interface PingServerState {
   victimPriority: string;
   startedAt: string;
   helpers: Helper[];
+  tier: 1 | 2;  // 1 = professional outreach only, 2 = full community
 }
 
 // ── Singleton state (shared between server + React) ──────────────────────────
@@ -32,7 +34,7 @@ let _state: PingServerState = {
   isRunning: false, port: 8080,
   victimLat: 0, victimLng: 0,
   victimNeeds: '', victimPriority: 'high',
-  startedAt: '', helpers: [],
+  startedAt: '', helpers: [], tier: 1,
 };
 let _server: ReturnType<typeof TcpSocket.createServer> | null = null;
 
@@ -42,6 +44,10 @@ export function getHelpers(): Helper[] { return [..._state.helpers]; }
 export function updateVictimLocation(lat: number, lng: number): void {
   _state.victimLat = lat;
   _state.victimLng = lng;
+}
+
+export function setTier(t: 1 | 2): void {
+  _state.tier = t;
 }
 
 // ── HTTP server ───────────────────────────────────────────────────────────────
@@ -99,18 +105,20 @@ function handleRequest(raw: string): Buffer {
       victimPriority: _state.victimPriority,
       startedAt:    _state.startedAt,
       helpers:      _state.helpers,
+      tier:         _state.tier,
     }));
   }
 
   // Helper responds
   if (method === 'POST' && path === '/respond') {
     try {
-      const parsed = JSON.parse(body) as { id?: string; name?: string; lat?: number; lng?: number };
+      const parsed = JSON.parse(body) as { id?: string; name?: string; message?: string; lat?: number; lng?: number };
       const id     = parsed.id ?? `h_${Date.now()}`;
       const existing = _state.helpers.findIndex(h => h.id === id);
       const helper: Helper = {
         id,
         name:        parsed.name ?? 'Anonymous helper',
+        message:     parsed.message || undefined,
         lat:         parsed.lat  ?? null,
         lng:         parsed.lng  ?? null,
         respondedAt: new Date().toISOString(),
@@ -144,6 +152,7 @@ export function startPingServer(opts: {
     victimPriority: opts.victimPriority,
     startedAt:      new Date().toISOString(),
     helpers:        [],
+    tier:           1,
   };
 
   _server = TcpSocket.createServer((socket) => {
@@ -201,9 +210,12 @@ function helperHtml(): string {
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#060D18;color:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
-#banner{background:#EF4444;padding:16px;text-align:center}
+#banner{background:#EF4444;padding:16px;text-align:center;transition:background .5s}
 #banner h1{font-size:20px;font-weight:800;letter-spacing:-0.5px}
 #banner p{font-size:12px;margin-top:3px;opacity:.85}
+#tier-badge{display:inline-block;padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-top:6px}
+.tier1-badge{background:#1565C044;color:#90CAF9;border:1px solid #1565C0}
+.tier2-badge{background:#EF444422;color:#FCA5A5;border:1px solid #EF4444}
 #info{padding:14px 16px;background:#0D1B2E;border-bottom:1px solid #1E3A5F}
 #needs{font-size:14px;line-height:1.6;margin-bottom:8px;color:#F8FAFC}
 .badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
@@ -211,28 +223,35 @@ body{background:#060D18;color:#F8FAFC;font-family:-apple-system,BlinkMacSystemFo
 #map{height:38vh;min-height:220px}
 #helpers{padding:12px 16px;background:#0D1B2E;border-top:1px solid #1E3A5F}
 #helpers h3{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#60A5FA;margin-bottom:8px;font-weight:700}
-.helper-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #1E3A5F22}
+.helper-row{padding:8px 0;border-bottom:1px solid #1E3A5F22}
+.hrow-top{display:flex;align-items:center}
 .hdot{width:10px;height:10px;background:#10B981;border-radius:50%;margin-right:10px;flex-shrink:0;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .hname{font-size:14px;flex:1;color:#F8FAFC}
 .htime{font-size:11px;color:#475569}
+.hmsg{font-size:12px;color:#10B981;margin-top:3px;margin-left:20px;font-style:italic}
 #respond{padding:16px}
 #respond input{width:100%;background:#0D1B2E;border:1px solid #1E3A5F;color:#F8FAFC;padding:12px;border-radius:8px;font-size:15px;margin-bottom:10px;outline:none}
 #respond input::placeholder{color:#475569}
-#rbtn{width:100%;background:#EF4444;color:#fff;font-size:16px;font-weight:700;padding:15px;border:none;border-radius:10px;cursor:pointer;letter-spacing:.3px}
+#rbtn{width:100%;background:#EF4444;color:#fff;font-size:16px;font-weight:700;padding:15px;border:none;border-radius:10px;cursor:pointer;letter-spacing:.3px;transition:background .3s}
 #rbtn:disabled{opacity:.5}
 #rdone{background:#061A0E;border:1px solid #10B98144;border-radius:10px;padding:14px;text-align:center;color:#10B981;font-weight:600;margin-top:10px;display:none;line-height:1.6}
 #sbar{text-align:center;padding:8px;font-size:11px;color:#475569}
 </style>
 </head>
 <body>
-<div id="banner"><h1>🛟 ESIS — Someone Nearby Needs Help</h1><p id="bsub">Loading...</p></div>
+<div id="banner">
+  <h1 id="btitle">🛟 ESIS — Someone Nearby Needs Help</h1>
+  <p id="bsub">Loading...</p>
+  <span id="tier-badge" class="tier2-badge">COMMUNITY RESPONSE</span>
+</div>
 <div id="info"><p id="needs">Loading case information...</p><span id="pbadge" class="badge"></span></div>
 <div id="map"></div>
-<div id="helpers"><h3>Helpers Responding (<span id="hcount">0</span>)</h3><div id="hlist"></div></div>
+<div id="helpers"><h3>Responding (<span id="hcount">0</span>)</h3><div id="hlist"></div></div>
 <div id="respond">
   <input id="nin" placeholder="Your name (optional)" maxlength="50">
-  <button id="rbtn" onclick="respond()">I'm Coming to Help</button>
+  <input id="mmsg" placeholder="I'm on my way to..." maxlength="100">
+  <button id="rbtn" onclick="respond()">I'm On My Way</button>
   <div id="rdone">✓ Response sent — they can see you're coming.<br><small style="color:#94A3B8;font-weight:400">Your location is being shared so they can find you.</small></div>
 </div>
 <div id="sbar">🔴 Live · Updates every 3 seconds</div>
@@ -242,10 +261,26 @@ var map=L.map('map').setView([39.7392,-104.9903],14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
 var vIcon=L.divIcon({html:'<div style="background:#EF4444;width:22px;height:22px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px #EF4444bb"></div>',iconSize:[22,22],iconAnchor:[11,11]});
 var hIcon=L.divIcon({html:'<div style="background:#10B981;width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 6px #10B981bb"></div>',iconSize:[16,16],iconAnchor:[8,8]});
-var vMarker=null,hMarkers={},responded=false,myLat=null,myLng=null;
+var vMarker=null,hMarkers={},responded=false,myLat=null,myLng=null,currentTier=2;
 var myId='h_'+Math.random().toString(36).slice(2,8);
 if(navigator.geolocation){navigator.geolocation.watchPosition(function(p){myLat=p.coords.latitude;myLng=p.coords.longitude},null,{enableHighAccuracy:true});}
 function updateUI(d){
+  currentTier=d.tier||2;
+  var banner=document.getElementById('banner');
+  var badge=document.getElementById('tier-badge');
+  var btitle=document.getElementById('btitle');
+  var rbtn=document.getElementById('rbtn');
+  if(currentTier===1){
+    banner.style.background='#1565C0';
+    badge.className='tier1-badge';badge.textContent='TIER 1 — PROFESSIONAL RESPONSE';
+    btitle.textContent='🚨 ESIS — Professional Response Needed';
+    if(!responded) rbtn.textContent="I'm On My Way — Professional Response";
+  } else {
+    banner.style.background='#EF4444';
+    badge.className='tier2-badge';badge.textContent='TIER 2 — COMMUNITY RESPONSE';
+    btitle.textContent='🛟 ESIS — Community Help Needed';
+    if(!responded) rbtn.textContent="I'm Coming to Help";
+  }
   document.getElementById('bsub').textContent='Active since '+new Date(d.startedAt).toLocaleTimeString();
   document.getElementById('needs').textContent=d.victimNeeds||'Needs immediate help';
   var pb=document.getElementById('pbadge');
@@ -261,11 +296,12 @@ function updateUI(d){
   hs.forEach(function(h){
     var row=document.createElement('div');row.className='helper-row';
     var t=new Date(h.respondedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    row.innerHTML='<div class="hdot"></div><span class="hname">'+(h.name||'Anonymous helper')+'</span><span class="htime">'+t+'</span>';
+    var msg=h.message?'<div class="hmsg">"'+h.message+'"</div>':'';
+    row.innerHTML='<div class="hrow-top"><div class="hdot"></div><span class="hname">'+(h.name||'Anonymous')+'</span><span class="htime">'+t+'</span></div>'+msg;
     el.appendChild(row);
     if(h.lat&&h.lng){
       if(hMarkers[h.id]){hMarkers[h.id].setLatLng([h.lat,h.lng]);}
-      else{hMarkers[h.id]=L.marker([h.lat,h.lng],{icon:hIcon}).addTo(map).bindPopup(h.name||'Helper');}
+      else{hMarkers[h.id]=L.marker([h.lat,h.lng],{icon:hIcon}).addTo(map).bindPopup(h.name||'Responder');}
     }
   });
 }
@@ -273,8 +309,9 @@ function poll(){fetch('/status').then(function(r){return r.json();}).then(update
 function respond(){
   if(responded)return;
   var name=document.getElementById('nin').value.trim()||'Anonymous';
+  var msg=document.getElementById('mmsg').value.trim();
   document.getElementById('rbtn').disabled=true;
-  fetch('/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:myId,name:name,lat:myLat,lng:myLng})})
+  fetch('/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:myId,name:name,message:msg||undefined,lat:myLat,lng:myLng})})
     .then(function(){responded=true;document.getElementById('rdone').style.display='block';document.getElementById('rbtn').textContent='✓ Responding';})
     .catch(function(){document.getElementById('rbtn').disabled=false;alert('Could not send — make sure you are on the same WiFi as the person who shared this link.');});
 }

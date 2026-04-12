@@ -19,8 +19,15 @@
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "FOREGROUND_SERVICE"
+        "FOREGROUND_SERVICE",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
       ]
+    },
+    "ios": {
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "ESIS uses Face ID to confirm your identity before sending an emergency Code Blue broadcast."
+      }
     },
     "plugins": [
       [

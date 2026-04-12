@@ -17,6 +17,7 @@ import LELogScreen from './src/screens/LELogScreen';
 import PingScreen from './src/screens/PingScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import SOSScreen from './src/screens/SOSScreen';
+import EscalatingSOS from './src/screens/EscalatingSOS';
 import CodeBlueScreen from './src/screens/CodeBlueScreen';
 import { RiskAssessment, RecommendationOutput } from './src/engine/types';
 
@@ -32,6 +33,7 @@ export type RootStackParamList = {
   LELog: { caseId: string };
   Ping: { caseId: string };
   SOS: { caseId: string };
+  EscalatingSOS: { caseId: string };
   CodeBlue: { caseId: string };
   Settings: undefined;
 };
@@ -74,8 +76,9 @@ export default function App() {
           <Stack.Screen name="LELog"        component={LELogScreen}        options={{ title: 'Police Interaction Log' }} />
           <Stack.Screen name="Ping"         component={PingScreen}         options={{ title: 'Community Ping' }} />
           <Stack.Screen name="Settings"     component={SettingsScreen}     options={{ title: 'Settings' }} />
-          <Stack.Screen name="SOS"          component={SOSScreen}          options={{ title: 'SOS Ping', headerStyle: { backgroundColor: '#0D0505' }, headerTintColor: '#EF4444' }} />
-          <Stack.Screen name="CodeBlue"     component={CodeBlueScreen}     options={{ title: 'Code Blue', headerStyle: { backgroundColor: '#04050F' }, headerTintColor: '#60A5FA' }} />
+          <Stack.Screen name="SOS"           component={SOSScreen}           options={{ title: 'SOS Ping', headerStyle: { backgroundColor: '#0D0505' }, headerTintColor: '#EF4444' }} />
+          <Stack.Screen name="EscalatingSOS" component={EscalatingSOS}       options={{ title: 'Escalating SOS', headerStyle: { backgroundColor: '#0D0505' }, headerTintColor: '#EF4444' }} />
+          <Stack.Screen name="CodeBlue"      component={CodeBlueScreen}      options={{ title: 'Code Blue', headerStyle: { backgroundColor: '#04050F' }, headerTintColor: '#60A5FA' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

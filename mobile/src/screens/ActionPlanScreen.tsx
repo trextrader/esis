@@ -1,6 +1,7 @@
 // mobile/src/screens/ActionPlanScreen.tsx
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { Alert, View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { colors, spacing } from '../theme';
@@ -46,11 +47,40 @@ export default function ActionPlanScreen() {
   const { caseId, recommendation: rec } = route.params;
   const isAcute = rec.immediateActions.length > 0;
 
+  const onCodeBlue = async () => {
+    try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled  = await LocalAuthentication.isEnrolledAsync();
+      if (hasHardware && isEnrolled) {
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Confirm identity to activate Code Blue',
+          disableDeviceFallback: false,
+          cancelLabel: 'Cancel',
+        });
+        if (!result.success) return; // user cancelled or auth failed
+      } else {
+        // No biometrics enrolled — single confirmation prompt
+        const confirmed = await new Promise<boolean>(resolve =>
+          Alert.alert(
+            'Activate Code Blue?',
+            'No biometric lock is set up on this device. Confirm to broadcast the emergency.',
+            [
+              { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
+              { text: 'Confirm', style: 'destructive', onPress: () => resolve(true) },
+            ]
+          )
+        );
+        if (!confirmed) return;
+      }
+      nav.navigate('CodeBlue', { caseId });
+    } catch { /* ignore */ }
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <TouchableOpacity
         style={styles.codeBlueBtn}
-        onPress={() => nav.navigate('CodeBlue', { caseId })}
+        onPress={onCodeBlue}
       >
         <Text style={styles.codeBlueBtnText}>CODE BLUE</Text>
         <Text style={styles.codeBlueBtnSub}>Immediate full-distress emergency broadcast</Text>
@@ -116,8 +146,8 @@ export default function ActionPlanScreen() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.sosBtn} onPress={() => nav.navigate('SOS', { caseId })}>
-        <Text style={styles.sosBtnText}>🆘  Real-Time SOS Ping</Text>
+      <TouchableOpacity style={styles.sosBtn} onPress={() => nav.navigate('EscalatingSOS', { caseId })}>
+        <Text style={styles.sosBtnText}>🆘  Escalating SOS Ping</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.pingBtn} onPress={() => nav.navigate('Ping', { caseId })}>
