@@ -65,6 +65,7 @@ export interface RecommendationOutput {
   stabilizationActions: string[];
   recoveryActions: string[];
   usedGemma?: boolean;
+  modelUsed?: string;  // which model actually responded (may differ from configured model)
 }
 
 export interface HousingTrack {

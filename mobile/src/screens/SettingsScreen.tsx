@@ -63,16 +63,26 @@ export default function SettingsScreen() {
       </View>
 
       <Text style={styles.sectionTitle}>Gemma Model</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="google/gemma-4-27b-it"
-        placeholderTextColor={colors.textMuted}
-        value={settings.gemmaModel}
-        onChangeText={v => setSettings(s => ({ ...s, gemmaModel: v }))}
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      <Text style={styles.hint}>Default: google/gemma-4-27b-it. Change only if using a different model.</Text>
+      <Text style={styles.hint}>
+        If you see a 410 error, the 27B model is unavailable on the free tier — tap a smaller model below.
+        ESIS auto-retries with fallbacks, but you can lock in a working model here.
+      </Text>
+      {[
+        { id: 'google/gemma-4-27b-it',   label: 'Gemma 4 27B (best)' },
+        { id: 'google/gemma-3-12b-it',   label: 'Gemma 3 12B' },
+        { id: 'google/gemma-2-9b-it',    label: 'Gemma 2 9B (most reliable)' },
+        { id: 'mistralai/Mistral-7B-Instruct-v0.3', label: 'Mistral 7B (fallback)' },
+      ].map(({ id, label }) => (
+        <TouchableOpacity
+          key={id}
+          style={[styles.modelBtn, settings.gemmaModel === id && styles.modelBtnActive]}
+          onPress={() => setSettings(s => ({ ...s, gemmaModel: id }))}
+        >
+          <Text style={[styles.modelBtnText, settings.gemmaModel === id && styles.modelBtnTextActive]}>
+            {label}
+          </Text>
+        </TouchableOpacity>
+      ))}
 
       <Text style={styles.sectionTitle}>Serper API Key (Live Service Search)</Text>
       <TextInput
@@ -129,6 +139,11 @@ const styles = StyleSheet.create({
                   color: colors.textPrimary, borderWidth: 1, borderColor: colors.border,
                   fontSize: 14, marginBottom: spacing.xs },
   hint:         { color: colors.textMuted, fontSize: 11, marginBottom: spacing.md },
+  modelBtn:     { backgroundColor: colors.card, borderRadius: 8, padding: spacing.sm,
+                  borderWidth: 1, borderColor: colors.border, marginBottom: spacing.xs },
+  modelBtnActive: { borderColor: colors.blue, backgroundColor: '#0A1E3A' },
+  modelBtnText:   { color: colors.textSecondary, fontSize: 13 },
+  modelBtnTextActive: { color: colors.blueLight, fontWeight: '700' },
   privacyCard:  { backgroundColor: '#061A0E', borderRadius: 8, padding: spacing.sm,
                   borderWidth: 1, borderColor: colors.green + '44', marginBottom: spacing.lg,
                   marginTop: spacing.md },

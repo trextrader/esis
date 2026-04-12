@@ -2,7 +2,19 @@
 import { StructuredCase, RiskAssessment, RecommendationOutput, PersonProfile, HousingTrack } from './types';
 import { getCityById, DEFAULT_CITY_ID } from '../data/cities';
 
-const HF_CHAT_URL = 'https://api-inference.huggingface.co/v1/chat/completions';
+// Model-specific endpoint — matches what InferenceClient uses in the Python/web app.
+// The generic /v1/chat/completions router returns 410 for Gemma 4 27B; the
+// per-model path /models/{model}/v1/chat/completions works correctly.
+const HF_BASE_URL = 'https://api-inference.huggingface.co';
+const hfChatUrl = (model: string) =>
+  `${HF_BASE_URL}/models/${model}/v1/chat/completions`;
+
+// Fallback cascade for 503 (loading/capacity) only.
+const FALLBACK_MODELS = [
+  'google/gemma-3-12b-it',
+  'google/gemma-2-9b-it',
+  'mistralai/Mistral-7B-Instruct-v0.3',
+];
 
 const SYSTEM_PROMPT = `You are ESIS — Edge Survival Intelligence System. You help people experiencing
 homelessness navigate life-threatening situations by generating structured,
@@ -130,28 +142,20 @@ export class GemmaError extends Error {
   }
 }
 
-export async function generateGemmaRecommendation(
-  c: StructuredCase,
-  risk: RiskAssessment,
+async function _callModel(
+  prompt: string,
   hfToken: string,
   model: string,
-  cityId: string = DEFAULT_CITY_ID,
-  liveServicesBlock: string = '',
-  profile?: PersonProfile,
-  housingTrack?: HousingTrack,
-): Promise<RecommendationOutput> {
-  const prompt = buildPrompt(c, risk, cityId, liveServicesBlock, profile, housingTrack);
-
+): Promise<{ summary: string; top_actions: string[]; fallback_plan: string; what_to_preserve: string[] }> {
   let resp: Response;
   try {
-    resp = await fetch(HF_CHAT_URL, {
+    resp = await fetch(hfChatUrl(model), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${hfToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: prompt },
@@ -165,7 +169,12 @@ export async function generateGemmaRecommendation(
   }
 
   if (resp.status === 401 || resp.status === 403) {
-    throw new GemmaError('Invalid HuggingFace token. Go to Settings and update your token.');
+    throw new GemmaError('Invalid HuggingFace token. Go to Settings and update your HF token.');
+  }
+  // 503 = model loading or capacity — retriable with a smaller fallback
+  // 410 should no longer occur with the per-model URL, but handle it just in case
+  if (resp.status === 503 || resp.status === 410) {
+    throw new GemmaError(`MODEL_UNAVAILABLE:${resp.status}:${model}`);
   }
   if (!resp.ok) {
     throw new GemmaError(`Gemma API error ${resp.status}. Try again in a moment.`);
@@ -182,14 +191,51 @@ export async function generateGemmaRecommendation(
     throw new GemmaError('Could not parse Gemma response. Try again.');
   }
 
-  return {
-    summary: parsed.summary || '',
-    topActions: (parsed.top_actions || []).slice(0, 3),
-    fallbackPlan: parsed.fallback_plan || '',
-    whatToPreserve: parsed.what_to_preserve || [],
-    immediateActions: [],
-    stabilizationActions: [],
-    recoveryActions: [],
-    usedGemma: true,
-  };
+  return parsed;
+}
+
+export async function generateGemmaRecommendation(
+  c: StructuredCase,
+  risk: RiskAssessment,
+  hfToken: string,
+  model: string,
+  cityId: string = DEFAULT_CITY_ID,
+  liveServicesBlock: string = '',
+  profile?: PersonProfile,
+  housingTrack?: HousingTrack,
+): Promise<RecommendationOutput> {
+  const prompt = buildPrompt(c, risk, cityId, liveServicesBlock, profile, housingTrack);
+
+  // Try the configured model first, then fall through to smaller fallbacks
+  // if the free tier doesn't have it (410) or it's loading (503).
+  const modelsToTry = [model, ...FALLBACK_MODELS.filter(m => m !== model)];
+
+  let lastUnavailableModel = '';
+  for (const m of modelsToTry) {
+    try {
+      const parsed = await _callModel(prompt, hfToken, m);
+      return {
+        summary: parsed.summary || '',
+        topActions: (parsed.top_actions || []).slice(0, 3),
+        fallbackPlan: parsed.fallback_plan || '',
+        whatToPreserve: parsed.what_to_preserve || [],
+        immediateActions: [],
+        stabilizationActions: [],
+        recoveryActions: [],
+        usedGemma: true,
+        modelUsed: m,
+      };
+    } catch (err) {
+      if (err instanceof GemmaError && err.message.startsWith('MODEL_UNAVAILABLE:')) {
+        lastUnavailableModel = m;
+        continue; // try next fallback
+      }
+      throw err; // auth errors, parse errors — don't retry
+    }
+  }
+
+  throw new GemmaError(
+    `${lastUnavailableModel} is not available on the HuggingFace free tier right now. ` +
+    `Go to Settings → Gemma Model and select a smaller model, or try again later.`,
+  );
 }
