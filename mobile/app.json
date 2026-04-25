@@ -13,9 +13,11 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#060D18"
       },
       "package": "com.esis.survival",
+      "usesCleartextTraffic": true,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -35,7 +37,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "ESIS needs your location to send a crisis ping to nearby community helpers."
         }
-      ]
+      ],
+      "expo-local-authentication"
     ],
     "extra": {
       "eas": {

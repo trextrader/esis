@@ -1,5 +1,5 @@
 // mobile/src/screens/SplashScreen.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Image, Text, StyleSheet, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -10,8 +10,8 @@ import { RootStackParamList } from '../../App';
 type Nav = StackNavigationProp<RootStackParamList, 'Splash'>;
 
 export default function SplashScreen() {
-  const nav    = useNavigation<Nav>();
-  const opacity = new Animated.Value(0);
+  const nav     = useNavigation<Nav>();
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.sequence([
