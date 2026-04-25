@@ -10,6 +10,7 @@ import { colors, spacing } from '../theme';
 import { normalizeCase } from '../engine/intake';
 import { scoreRisk } from '../engine/triage';
 import { generateGemmaRecommendation, GemmaError } from '../engine/gemma';
+import { generateRecommendation } from '../engine/recommendation';
 import { assignHousingTrack } from '../engine/housing_track';
 import { generatePacket } from '../engine/packet';
 import { loadAllCases, saveCase, newCaseId } from '../storage/cases';
@@ -102,17 +103,17 @@ export default function CaseInputScreen() {
           inp.city, liveServicesBlock, profile, housingTrack,
         );
       } catch (err) {
-        setAnalyzing(false);
-        setAnalyzeStep('');
         if (err instanceof GemmaError) {
-          Alert.alert('Gemma 4 Error', err.message, [
-            { text: 'Go to Settings', onPress: () => nav.navigate('Settings') },
-            { text: 'Cancel', style: 'cancel' },
-          ]);
+          // AI unavailable — fall back to the deterministic engine so the
+          // user still gets a full action plan rather than a dead-end error.
+          setAnalyzeStep('Generating plan (offline mode)...');
+          recommendation = generateRecommendation(structured, risk);
         } else {
+          setAnalyzing(false);
+          setAnalyzeStep('');
           Alert.alert('Error', 'Unexpected error. Please try again.');
+          return;
         }
-        return;
       }
 
       const packet = generatePacket(structured, risk, recommendation);

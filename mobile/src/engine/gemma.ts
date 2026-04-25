@@ -2,14 +2,14 @@
 import { StructuredCase, RiskAssessment, RecommendationOutput, PersonProfile, HousingTrack } from './types';
 import { getCityById, DEFAULT_CITY_ID } from '../data/cities';
 
-// Model-specific endpoint — matches what InferenceClient uses in the Python/web app.
-// The generic /v1/chat/completions router returns 410 for Gemma 4 27B; the
-// per-model path /models/{model}/v1/chat/completions works correctly.
-const HF_BASE_URL = 'https://api-inference.huggingface.co';
+// HuggingFace moved Gemma 4+ to the new Inference Providers router.
+// api-inference.huggingface.co returns 404 for these models; the correct
+// base is router.huggingface.co/hf-inference.
+const HF_BASE_URL = 'https://router.huggingface.co/hf-inference';
 const hfChatUrl = (model: string) =>
   `${HF_BASE_URL}/models/${model}/v1/chat/completions`;
 
-// Fallback cascade for 503 (loading/capacity) only.
+// Fallback cascade — tried in order when the primary model is unavailable (404/503/410).
 const FALLBACK_MODELS = [
   'google/gemma-3-12b-it',
   'google/gemma-2-9b-it',
@@ -171,9 +171,9 @@ async function _callModel(
   if (resp.status === 401 || resp.status === 403) {
     throw new GemmaError('Invalid HuggingFace token. Go to Settings and update your HF token.');
   }
-  // 503 = model loading or capacity — retriable with a smaller fallback
-  // 410 should no longer occur with the per-model URL, but handle it just in case
-  if (resp.status === 503 || resp.status === 410) {
+  // 404 = model not on this provider tier, 503 = loading/capacity, 410 = gone
+  // All three cascade to the next fallback model rather than surfacing to the user.
+  if (resp.status === 404 || resp.status === 503 || resp.status === 410) {
     throw new GemmaError(`MODEL_UNAVAILABLE:${resp.status}:${model}`);
   }
   if (!resp.ok) {
