@@ -167,7 +167,7 @@ def render_resource_map(person_lat: float, person_lng: float, resources: list[di
             layers=[resource_layer, person_layer],
             initial_view_state=view_state,
             tooltip=tooltip,
-            map_style="mapbox://styles/mapbox/dark-v10",
+            map_style=pdk.map_styles.CARTO_DARK,
         )
 
         st.pydeck_chart(deck)
