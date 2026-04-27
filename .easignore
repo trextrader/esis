@@ -1,0 +1,33 @@
+# EAS archives from the git root — exclude everything not needed for the Android build
+
+# Python web app
+app/
+data/
+models/
+tests/
+*.py
+*.yaml
+*.yml
+requirements*.txt
+
+# Docs and assets not needed for mobile build
+docs/
+av/
+*.pdf
+*.wav
+
+# Mobile build artifacts and dependencies (EAS installs fresh on its servers)
+mobile/node_modules/
+mobile/android/
+mobile/ios/
+mobile/.expo/
+mobile/build/
+mobile/*.apk
+mobile/*.aab
+
+# Misc
+.git/
+*.log
+__pycache__/
+*.pyc
+.env
